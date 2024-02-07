@@ -4,6 +4,7 @@ url = 'http://export.arxiv.org/api/query?search_query=all:electron&start=0&max_r
 data = requests.get(url)
 data = xmltodict.parse(data.text)
 
+
 for entry in data['feed']['entry']:
     try:
         print("-"*50)
