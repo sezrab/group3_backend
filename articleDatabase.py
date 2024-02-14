@@ -20,11 +20,11 @@ class ArticleDatabase:
     def add_article(self, article):
         # "article" is an object of class Article (From models.article)
         # add it to the database's "articles" table
-        self.articles.append(article)
+        pass
 
     def remove_article(self, article):
         # delete the row which matches the article's title
-        self.articles.remove(article)
+        pass
 
     def get_articles(self, sort, start_at, max_results, topics):
-        return self.articles
+        return []
