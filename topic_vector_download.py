@@ -25,7 +25,6 @@ for topic in subtopics:
         abstracts += [paper["abstract"].lower() for paper in papers]
     print(f"Analysing topic '{topic}'...")
     abstracts = " ".join(abstracts)
-
     tf = paper_processor.tf(abstracts)
     vf[topic] = tf
 

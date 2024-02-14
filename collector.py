@@ -1,8 +1,11 @@
+import random
+import os
+import json
 import sqlite3
 import requests
 import xmltodict
 from models.article import Article
-from topic_classifier import tagger
+from topic_classifier import tagger, utils
 CONFIDENCE_THRESH = 0.16
 
 
@@ -23,14 +26,16 @@ def getArxivData(search_query, start=0, max_results=10, sortBy="submittedDate"):
 
     for entry in data['feed']['entry']:
         try:
-            data['author'] = [].extend([entry['name']
+            entry['author'] = [].extend([entry['name']
                                         for entry in entry['author']])
         except TypeError:
 
-            data['author'] = [entry['author']['name']]
+            entry['author'] = [entry['author']['name']]
 
-        entry['tags'] = tagger.tag_abstract(
+        tags = tagger.tag_abstract(
             entry['summary'], thresh=CONFIDENCE_THRESH, data_folder="topic_classifier/data/")
+
+        entry['tags'] = tags
 
         articles.append(Article.fromJSON(entry))
 
@@ -71,12 +76,41 @@ def getArxivData(search_query, start=0, max_results=10, sortBy="submittedDate"):
 #     conn.commit()
 #     return conn
 
+topicData = utils.load_topic_vector_file("topic_classifier/data/")
+topics = list(topicData.keys())
+
+# choose five random topics
+topics = random.sample(topics, 5)
+
 
 if __name__ == "__main__":
     # conn = initArchiveDB()
+    import datetime
+    date = datetime.datetime.now().strftime("%d%m%y")
 
-    arcs = getArxivData("natural language processing",
-                        max_results=100, sortBy="submittedDate")
-    for a in arcs:
-        print(a.title)
-        print(a.tags)
+    todayArchive = f"archive_{date}.json"
+
+    if not os.path.exists(todayArchive):
+        print("Archive does not exist")
+        arcs = getArxivData("natural language processing",
+                            max_results=100, sortBy="submittedDate")
+        out = []
+        for arc in arcs:
+            out.append(arc.toJSON())
+
+        json.dump(out, open(todayArchive, 'w'))
+    else:
+        print("Archive already exists")
+        arcs = json.load(open(todayArchive, 'r'))
+        for i in range(len(arcs)):
+            arcs[i] = Article.fromJSON(arcs[i])
+
+    print(f"Found {len(arcs)} articles")
+    print(f"My interests: {topics}")
+    print()
+    for arc in arcs:
+        # get intersection of topics and tags
+        matches = list(set(arc.tags_noscore) & set(topics))
+        if len(matches) > 0:
+            print(arc.title, len(matches))
+            print()

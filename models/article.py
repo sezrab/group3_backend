@@ -32,9 +32,23 @@ class Article:
         return self._tags
 
     @property
+    def tags_noscore(self):
+        return [tag[0] for tag in self._tags]
+
+    @property
     def link(self):
         return self._link
 
     @staticmethod
     def fromJSON(json):
         return Article(json['id'], json['title'], json['summary'], json['author'], json['tags'], json['link'])
+
+    def toJSON(self):
+        return {
+            'id': self._id,
+            'title': self._title,
+            'summary': self._abstract,
+            'author': self._author,
+            'tags': self._tags,
+            'link': self._link
+        }
