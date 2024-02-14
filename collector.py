@@ -42,40 +42,6 @@ def getArxivData(search_query, start=0, max_results=10, sortBy="submittedDate"):
     return articles
 
 
-# def initArchiveDB():
-#     # make a article table
-#     # make a "last_update" table
-#     # make a trigger to update the last_update table
-#     conn = sqlite3.connect('archive.db')
-#     c = conn.cursor()
-#     c.execute('''
-#     CREATE TABLE IF NOT EXISTS articles (
-#         id INTEGER PRIMARY KEY,
-#         title TEXT,
-#         summary TEXT,
-#         published TEXT,
-#         updated TEXT,
-#         authors TEXT,
-#         tags TEXT
-#     )
-#     ''')
-#     c.execute('''
-#     CREATE TABLE IF NOT EXISTS last_update (
-#         id INTEGER PRIMARY KEY,
-#         last_update TEXT
-#     )
-#     ''')
-#     c.execute('''
-#     CREATE TRIGGER IF NOT EXISTS update_last_update
-#     AFTER INSERT ON articles
-#     BEGIN
-#         DELETE FROM last_update;
-#         INSERT INTO last_update (last_update) VALUES (datetime('now'));
-#     END
-#     ''')
-#     conn.commit()
-#     return conn
-
 topicData = utils.load_topic_vector_file("topic_classifier/data/")
 topics = list(topicData.keys())
 
