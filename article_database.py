@@ -41,18 +41,28 @@ class ArticleDatabase:
         self._con = con
         self._cur = cur
 
-    def add_article(self, article):
+    def add_article(self, article, auto_commit=True):
         # insert the article's title, abstract, and url into the "articles" table
-        article_id = self._cur.execute("INSERT INTO articles (title, abstract, url) VALUES (?, ?, ?)", (
-            article.title, article.abstract, article.url)).lastrowid
+        try:
+            article_id = self._cur.execute("INSERT INTO articles (title, abstract, url) VALUES (?, ?, ?)", (
+                article.title, article.abstract, article.url)).lastrowid
+        except sqlite3.IntegrityError:
+            # abort, the article already exists in the db
+            return
         # insert authors into the "article_authors" table
+        if article.authors is None:
+            return
         for author in article.authors:
             self._cur.execute(
                 "INSERT INTO article_authors (article_id, author_name) VALUES (?, ?)", (article_id, author))
         # insert tags into the "article_tags" table
         for tag in article.tags:
             self._cur.execute(
-                "INSERT INTO article_tags (article_id, tag_name) VALUES (?, ?)", (article_id, tag))
+                "INSERT INTO article_tags (article_id, tag_name) VALUES (?, ?)", (article_id, tag[0]))
+        if auto_commit:
+            self._con.commit()
+
+    def commit(self):
         self._con.commit()
 
     def remove_article(self, article):

@@ -1,11 +1,15 @@
 
+import datetime
+
+
 class Article:
-    def __init__(self, title, abstract, authors, tags, url, id=None):
+    def __init__(self, title, abstract, authors, tags, published, url, id=None):
         self._id = id
         self._title = title
         self._abstract = abstract
         self._authors = authors
         self._tags = tags
+        self._published = published
         self._url = url
 
     def __str__(self) -> str:
@@ -39,9 +43,16 @@ class Article:
     def url(self):
         return self._url
 
+    @property
+    def published(self):
+        return self._published
+
     @staticmethod
     def fromJSON(json):
-        return Article(json['id'], json['title'], json['summary'], json['authors'], json['tags'], json['link'])
+        return Article(title=json['title'], abstract=json['summary'], authors=json['authors'], tags=json['tags'], url=json['url'],
+                       published=datetime.datetime.strptime(
+                           json['published'], "%Y-%m-%dT%H:%M:%SZ") if json['published'] else None
+                       )
 
     def toJSON(self):
         return {
@@ -50,5 +61,6 @@ class Article:
             'summary': self._abstract,
             'authors': self._authors,
             'tags': self._tags,
-            'link': self._link
+            'published': self._published.isoformat() if self._published else None,
+            'url': self._url
         }

@@ -1,3 +1,4 @@
+import datetime
 import random
 import os
 import json
@@ -6,7 +7,7 @@ import requests
 import xmltodict
 from models.article import Article
 from topic_classifier import tagger, utils
-CONFIDENCE_THRESH = 0.16
+CONFIDENCE_THRESH = 0.11
 
 
 def getArxivData(search_query, start=0, max_results=10, sortBy="submittedDate"):
@@ -20,16 +21,25 @@ def getArxivData(search_query, start=0, max_results=10, sortBy="submittedDate"):
     url = f'http://export.arxiv.org/api/query?sortBy={sortBy}&search_query={
         search_query}&start={start}&max_results={max_results}'
     data = requests.get(url)
-    data = xmltodict.parse(data.text)
-
+    try:
+        entries = xmltodict.parse(data.text)['feed']['entry']
+    except KeyError:
+        return []
     articles = []
 
-    for entry in data['feed']['entry']:
+    for entry in entries:
         try:
             entry['authors'] = [].extend([entry['name']
                                           for entry in entry['author']])
         except TypeError:
             entry['authors'] = [entry['author']['name']]
+
+        for url in entry['link']:
+            if url.get("@title") == "pdf":
+                entry['url'] = url["@href"]
+                break
+            else:
+                entry['url'] = entry['link'][0]["@href"]
 
         tags = tagger.tag_abstract(
             entry['summary'], thresh=CONFIDENCE_THRESH, data_folder="topic_classifier/data/")
@@ -41,41 +51,84 @@ def getArxivData(search_query, start=0, max_results=10, sortBy="submittedDate"):
     return articles
 
 
-topicData = utils.load_topic_vector_file("topic_classifier/data/")
-topics = list(topicData.keys())
-
-# choose five random topics
-topics = random.sample(topics, 5)
-
-
 if __name__ == "__main__":
-    # conn = initArchiveDB()
-    import datetime
-    date = datetime.datetime.now().strftime("%d%m%y")
-
-    todayArchive = f"archive_{date}.json"
-
-    if not os.path.exists(todayArchive):
-        print("Archive does not exist")
-        arcs = getArxivData("natural language processing",
-                            max_results=100, sortBy="submittedDate")
-        out = []
-        for arc in arcs:
-            out.append(arc.toJSON())
-
-        json.dump(out, open(todayArchive, 'w'))
+    COLLECTION_INTERVAL = 1  # in days
+    # read or create a collector_data.json file
+    if os.path.exists("collector_data.json"):
+        cdata = json.load(open("collector_data.json", 'r'))
+        # get "last_updated" from the file as a datetime object
+        last_updated = cdata['last_updated']
+        last_updated = datetime.datetime.strptime(last_updated, "%d%m%y")
+        # if it's been more than N days, update the data
+        today = datetime.datetime.now()
+        number_of_days = (today - last_updated).days
+        if number_of_days < COLLECTION_INTERVAL:
+            print(
+                f"Data was last collected {number_of_days} days ago. Skipping collection.")
+            exit()
     else:
-        print("Archive already exists")
-        arcs = json.load(open(todayArchive, 'r'))
-        for i in range(len(arcs)):
-            arcs[i] = Article.fromJSON(arcs[i])
+        last_updated = datetime.datetime.now(
+        ) - datetime.timedelta(days=COLLECTION_INTERVAL*10)
 
-    print(f"Found {len(arcs)} articles")
-    print(f"My interests: {topics}")
-    print()
-    for arc in arcs:
-        # get intersection of topics and tags
-        matches = list(set(arc.tags_noscore) & set(topics))
-        if len(matches) > 0:
-            print(arc.title, len(matches))
-            print()
+    json.dump({"last_updated": datetime.datetime.now().strftime(
+        "%d%m%y")}, open("collector_data.json", 'w'))
+
+    import article_database
+    db = article_database.ArticleDatabase()
+
+    start = 0
+    inDateRange = True
+    while inDateRange:
+        results = getArxivData("natural language processing", start=start, max_results=100,
+                               sortBy="submittedDate")
+        start += 100
+        if len(results) == 0:
+            inDateRange = False
+            break
+        for result in results:
+            if result.published > last_updated:
+                # print(f"Adding {result.title}")
+                print(result.title)
+                print(result.tags)
+                db.add_article(result, auto_commit=False)
+            else:
+                inDateRange = False
+                break
+    db.commit()
+
+    # topicData = utils.load_topic_vector_file("topic_classifier/data/")
+    # topics = list(topicData.keys())
+
+    # # choose five random topics
+    # topics = random.sample(topics, 5)
+
+    # # conn = initArchiveDB()
+    # import datetime
+    # date = datetime.datetime.now().strftime("%d%m%y")
+
+    # todayArchive = f"archive_{date}.json"
+
+    # if not os.path.exists(todayArchive):
+    #     print("Archive does not exist")
+    #     arcs = getArxivData("natural language processing",
+    #                         max_results=100, sortBy="submittedDate")
+    #     out = []
+    #     for arc in arcs:
+    #         out.append(arc.toJSON())
+
+    #     json.dump(out, open(todayArchive, 'w'))
+    # else:
+    #     print("Archive already exists")
+    #     arcs = json.load(open(todayArchive, 'r'))
+    #     for i in range(len(arcs)):
+    #         arcs[i] = Article.fromJSON(arcs[i])
+
+    # print(f"Found {len(arcs)} articles")
+    # print(f"My interests: {topics}")
+    # print()
+    # for arc in arcs:
+    #     # get intersection of topics and tags
+    #     matches = list(set(arc.tags_noscore) & set(topics))
+    #     if len(matches) > 0:
+    #         print(arc.title, len(matches))
+    #         print()
