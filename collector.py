@@ -26,11 +26,10 @@ def getArxivData(search_query, start=0, max_results=10, sortBy="submittedDate"):
 
     for entry in data['feed']['entry']:
         try:
-            entry['author'] = [].extend([entry['name']
-                                        for entry in entry['author']])
+            entry['authors'] = [].extend([entry['name']
+                                          for entry in entry['author']])
         except TypeError:
-
-            entry['author'] = [entry['author']['name']]
+            entry['authors'] = [entry['author']['name']]
 
         tags = tagger.tag_abstract(
             entry['summary'], thresh=CONFIDENCE_THRESH, data_folder="topic_classifier/data/")
