@@ -13,7 +13,7 @@ class Article:
         self._url = url
 
     def __str__(self) -> str:
-        return f'{self.title} by {', '.join(self._authors)}'
+        return self.title + " by " + ', '.join(self._authors)
 
     @property
     def id(self):

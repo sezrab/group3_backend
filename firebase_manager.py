@@ -3,18 +3,18 @@ class FirebaseManager:
         # CONNECT TO FIREBASE DATABASE
         pass
 
-    def bookmarks(user_id):
+    def bookmarks(self, user_id):
         # get all the bookmarks of a user
         return [5, 1, 25, 32]
 
-    def interests(user_id):
+    def interests(self, user_id):
         # get all the interests of a user
         return ["Text Normalization",
                 "Sequence Labeling",
                 "Dialogue Systems",
                 "Automatic Summarization",]
 
-    def settings(user_id):
+    def settings(self, user_id):
         # get all the settings of a user
         return {
             "dark_mode": True,
