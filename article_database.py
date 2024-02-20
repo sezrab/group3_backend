@@ -69,7 +69,7 @@ class ArticleDatabase:
         # delete the row which matches the article's title
         pass
 
-    def get_articles(self, sort, start_at, max_results, topics):
+    def get_articles(self, sort, start_at, max_results, topics): #want to get a list of articles fromn start to max which contains topics tags
         return []
 
     def list_all_articles(self):
@@ -84,7 +84,8 @@ class ArticleDatabase:
                 authors[i] = author[0]
             tags = self._cur.execute(
                 "SELECT tag_name FROM article_tags WHERE article_id = ?", (id,)).fetchall()
-            a = Article(title, abstract, authors, tags, url)
+            import datetime
+            a = Article(title=title, abstract=abstract, authors=authors, tags=tags,url= url, published=datetime.datetime.today())
             objects.append(a)
         return objects
 

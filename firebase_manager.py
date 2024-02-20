@@ -9,10 +9,7 @@ class FirebaseManager:
 
     def interests(self, user_id):
         # get all the interests of a user
-        return ["Text Normalization",
-                "Sequence Labeling",
-                "Dialogue Systems",
-                "Automatic Summarization",]
+        return ['Stop Words Removal']
 
     def settings(self, user_id):
         # get all the settings of a user
