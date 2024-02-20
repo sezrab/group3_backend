@@ -84,7 +84,8 @@ class ArticleDatabase:
                 authors[i] = author[0]
             tags = self._cur.execute(
                 "SELECT tag_name FROM article_tags WHERE article_id = ?", (id,)).fetchall()
-            objects.append(Article(title, abstract, authors, tags, url))
+            a = Article(title, abstract, authors, tags, url)
+            objects.append(a)
         return objects
 
 
@@ -97,6 +98,3 @@ if __name__ == "__main__":
         adb.add_article(article)
     except:
         pass
-    # get the articles
-    for a in adb.list_all_articles():
-        print(a)

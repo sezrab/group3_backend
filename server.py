@@ -11,7 +11,15 @@ adb = ArticleDatabase()
 @app.route('/getFeed', methods=['GET'])
 def get_articles():
     userid = request.args.get('user_id')
+    # Using user ID, get the user's interests from FIREBASE
+    # Use some algorithm to curate a feed.
+    # (For now, just return all articles matching the user's interests)
+
     sortby = request.args.get('sort_by')
+
     interests = fb.interests(userid)
+
     articles = adb.get_articles(sortby, 0, 10, interests)
-    return jsonify()
+    output = []
+    for article in articles:
+        output.append(article.to_dict())
