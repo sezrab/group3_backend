@@ -28,5 +28,16 @@ def get_articles():
     return response
 
 
+@app.route('/testing', methods=['GET'])
+def recommendation_testing():
+    adb = ArticleDatabase()
+
+    articles = adb.get_articles(2, 0, 100, fb.interests(1))
+    output = []
+    for article,score in articles:
+        output.append((article.toJSON(),score))
+
+    return output
+
 if __name__ == '__main__':
     app.run()
