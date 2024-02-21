@@ -69,10 +69,23 @@ class ArticleDatabase:
     def remove_article(self, article):
         # delete the row which matches the article's title
         pass
-
+    
+    # recommendation algorithm
     # want to get a list of articles fromn start to max which contains topics tags
-    def get_articles(self, sort, start_at, max_results, topics):
-        return []
+    def get_articles(self, sort, start_at, max_results, interests):
+        articles_ranked = []
+
+        #for article in self.list_all_articles():
+        for article in self.list_all_articles():
+            total = 0
+            for interest,interest_score in interests:
+                for topic,topic_score in article.tags:
+                    if (interest == topic):
+                        total = interest_score * topic_score
+                        articles_ranked.append((article,total))
+        
+        return sorted(articles_ranked,key=lambda x: x[1],reverse=True)
+    
 
     def list_all_articles(self):
         # get articles, corresponding authors, and tags from the database
