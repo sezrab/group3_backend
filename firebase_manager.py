@@ -9,7 +9,7 @@ class FirebaseManager:
 
     def interests(self, user_id):
         # get all the interests of a user
-        return ['Stop Words Removal']
+        return [('Stemming', 0.6), ('Lemmatization', 0.2), ('Stop Words Removal', 0.2)]
 
     def settings(self, user_id):
         # get all the settings of a user
