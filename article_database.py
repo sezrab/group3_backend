@@ -25,6 +25,7 @@ class ArticleDatabase:
                 id INTEGER PRIMARY KEY AUTOINCREMENT, 
                 article_id INTEGER NOT NULL, 
                 tag_name TEXT NOT NULL,
+                score REAL NOT NULL,
                 FOREIGN KEY(article_id) REFERENCES articles(id)
                 )
                 """)
@@ -58,7 +59,7 @@ class ArticleDatabase:
         # insert tags into the "article_tags" table
         for tag in article.tags:
             self._cur.execute(
-                "INSERT INTO article_tags (article_id, tag_name) VALUES (?, ?)", (article_id, tag[0]))
+                "INSERT INTO article_tags (article_id, tag_name, score) VALUES (?, ?)", (article_id, tag[0], tag[1]))
         if auto_commit:
             self._con.commit()
 
@@ -69,7 +70,8 @@ class ArticleDatabase:
         # delete the row which matches the article's title
         pass
 
-    def get_articles(self, sort, start_at, max_results, topics): #want to get a list of articles fromn start to max which contains topics tags
+    # want to get a list of articles fromn start to max which contains topics tags
+    def get_articles(self, sort, start_at, max_results, topics):
         return []
 
     def list_all_articles(self):
@@ -83,9 +85,10 @@ class ArticleDatabase:
             for i, author in enumerate(authors):
                 authors[i] = author[0]
             tags = self._cur.execute(
-                "SELECT tag_name FROM article_tags WHERE article_id = ?", (id,)).fetchall()
+                "SELECT tag_name,score FROM article_tags WHERE article_id = ?", (id,)).fetchall()
             import datetime
-            a = Article(title=title, abstract=abstract, authors=authors, tags=tags,url= url, published=datetime.datetime.today())
+            a = Article(title=title, abstract=abstract, authors=authors,
+                        tags=tags, url=url, published=datetime.datetime.today())
             objects.append(a)
         return objects
 
