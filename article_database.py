@@ -59,7 +59,7 @@ class ArticleDatabase:
         # insert tags into the "article_tags" table
         for tag in article.tags:
             self._cur.execute(
-                "INSERT INTO article_tags (article_id, tag_name, score) VALUES (?, ?)", (article_id, tag[0], tag[1]))
+                "INSERT INTO article_tags (article_id, tag_name, score) VALUES (?, ?, ?)", (article_id, tag[0], tag[1]))
         if auto_commit:
             self._con.commit()
 

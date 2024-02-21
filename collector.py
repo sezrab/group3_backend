@@ -29,10 +29,13 @@ def getArxivData(search_query, start=0, max_results=10, sortBy="submittedDate"):
 
     for entry in entries:
         try:
-            entry['authors'] = [].extend([entry['name']
-                                          for entry in entry['author']])
+            author_names = [author['name'] for author in entry['author']]
+            entry['author'] = author_names
+            entry['authors'] = author_names
         except TypeError:
             entry['authors'] = [entry['author']['name']]
+            entry['author'] = [entry['author']['name']]
+        print(entry['author'])
         if entry['authors'] == []:
             print(entry)
             exit()
