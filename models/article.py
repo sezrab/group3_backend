@@ -60,7 +60,7 @@ class Article:
             'title': self._title,
             'summary': self._abstract,
             'authors': self._authors,
-            'tags': self._tags,
+            'tags': self.tags_noscore,
             'published': self._published.isoformat() if self._published else None,
             'url': self._url
         }

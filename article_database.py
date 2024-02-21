@@ -87,7 +87,7 @@ class ArticleDatabase:
             tags = self._cur.execute(
                 "SELECT tag_name,score FROM article_tags WHERE article_id = ?", (id,)).fetchall()
             import datetime
-            a = Article(title=title, abstract=abstract, authors=authors,
+            a = Article(id=id, title=title, abstract=abstract, authors=authors,
                         tags=tags, url=url, published=datetime.datetime.today())
             objects.append(a)
         return objects
