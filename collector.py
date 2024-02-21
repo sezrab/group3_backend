@@ -18,8 +18,7 @@ def getArxivData(search_query, start=0, max_results=10, sortBy="submittedDate"):
     #               sortBy : relevance, submittedDate, lastUpdatedDate
     #               sortOrder : ascending, descending
 
-    url = f'http://export.arxiv.org/api/query?sortBy={sortBy}&search_query={
-        search_query}&start={start}&max_results={max_results}'
+    url = f'http://export.arxiv.org/api/query?sortBy={sortBy}&search_query={search_query}&start={start}&max_results={max_results}'
     data = requests.get(url)
     try:
         entries = xmltodict.parse(data.text)['feed']['entry']

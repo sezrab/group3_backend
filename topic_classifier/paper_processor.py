@@ -1,10 +1,8 @@
 import math
 import string
 import numpy as np
-from wordcloud import WordCloud
 from . import scraper
 from . import utils
-from matplotlib import pyplot as plt
 
 stopwords = utils.load_lines("topic_classifier/data/stopwords.txt")
 
@@ -73,12 +71,3 @@ if __name__ == "__main__":
 
     # perform frequency analysis on all the abstracts
     tf = tf(abstracts)
-
-    # Generate a word cloud image
-    wc = WordCloud(background_color='white', colormap='plasma',
-                   width=1600, height=1600).generate_from_frequencies(tf)
-    plt.figure(figsize=(10, 10))
-    plt.imshow(wc, interpolation="bilinear")
-    plt.axis("off")
-    plt.savefig('wordcloud_{}.png'.format(q.replace(" ", "_")),
-                facecolor='k', bbox_inches='tight')
