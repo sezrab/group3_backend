@@ -1,7 +1,7 @@
 import math
 import string
 import numpy as np
-from . import scraper
+# from . import scraper
 from . import utils
 
 stopwords = utils.load_lines("topic_classifier/data/stopwords.txt")
@@ -61,13 +61,13 @@ def cosine_similarity(tf1, tf2):
     return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
 
 
-if __name__ == "__main__":
-    q = input("Search query: ")
-    papers = []
-    for page in range(5):
-        papers += scraper.scrape_arxiv(q, page)
+# if __name__ == "__main__":
+#     q = input("Search query: ")
+#     papers = []
+#     for page in range(5):
+#         papers += scraper.scrape_arxiv(q, page)
 
-    abstracts = " ".join([paper["abstract"].lower() for paper in papers])
+#     abstracts = " ".join([paper["abstract"].lower() for paper in papers])
 
-    # perform frequency analysis on all the abstracts
-    tf = tf(abstracts)
+#     # perform frequency analysis on all the abstracts
+#     tf = tf(abstracts)
