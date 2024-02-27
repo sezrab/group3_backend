@@ -43,7 +43,9 @@ def recommendation_testing():
 @app.route('/search', methods=['GET'])
 def user_search():
     adb = ArticleDatabase()
-    to_search = request.args.get('a')
+    to_search = request.args.get('q')
+    if to_search == None:
+        return []
     matched_articles = adb.search_articles(to_search)
     
     return matched_articles
