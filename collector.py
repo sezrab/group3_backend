@@ -7,7 +7,7 @@ import requests
 import xmltodict
 from models.article import Article
 from topic_classifier import tagger, utils
-CONFIDENCE_THRESH = 0.11
+CONFIDENCE_THRESH = 0.15
 
 
 def getArxivData(search_query, start=0, max_results=10, sortBy="submittedDate"):
@@ -18,10 +18,12 @@ def getArxivData(search_query, start=0, max_results=10, sortBy="submittedDate"):
     #               sortBy : relevance, submittedDate, lastUpdatedDate
     #               sortOrder : ascending, descending
 
-    url = f'http://export.arxiv.org/api/query?sortBy={sortBy}&search_query={search_query}&start={start}&max_results={max_results}'
+    url = f'http://export.arxiv.org/api/query?sortBy={sortBy}&search_query={
+        search_query}&start={start}&max_results={max_results}'
     data = requests.get(url)
     try:
-        entries = xmltodict.parse(data.text)['feed']['entry']
+        entries = xmltodict.parse(' '.join(data.text.replace("\n", " ").split()))[
+            'feed']['entry']
     except KeyError:
         return []
     articles = []
@@ -34,7 +36,7 @@ def getArxivData(search_query, start=0, max_results=10, sortBy="submittedDate"):
         except TypeError:
             entry['authors'] = [entry['author']['name']]
             entry['author'] = [entry['author']['name']]
-        print(entry['author'])
+        # print(entry['author'])
         if entry['authors'] == []:
             print(entry)
             exit()

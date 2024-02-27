@@ -10,15 +10,17 @@ fb = FirebaseManager()
 @app.route('/getFeed', methods=['GET'])
 def get_articles():
     adb = ArticleDatabase()
-    # userid = request.args.get('user_id')
+    userid = request.args.get('user_id')
+
     # Using user ID, get the user's interests from FIREBASE
     # Use some algorithm to curate a feed.
 
     sortby = request.args.get('sort_by')
 
     # interests = fb.interests(userid)
-    articles = adb.list_all_articles()
-    # articles = adb.get_articles(sortby, 0, 10, interests)
+    # articles = adb.list_all_articles()
+    interests = fb.interests(userid)
+    articles = [a[0] for a in adb.get_articles(sortby, 0, 10, interests)]
     output = []
     for article in articles:
         output.append(article.toJSON())
@@ -33,7 +35,9 @@ def get_all_topics():
     with open("topics.txt") as f:
         topics = f.readlines()
     topics = [x.strip() for x in topics]
-    return jsonify(topics)
+    response = jsonify(topics)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 
 @app.route('/testing', methods=['GET'])
