@@ -103,6 +103,31 @@ class ArticleDatabase:
         return objects
 
 
+    def search_articles(self, to_search):
+        # get articles which match in some way with the keyword in the title, abstract, authors, or tags
+        
+        matched_article_id = []
+        
+        from_articles = self._cur.execute(
+            "SELECT id FROM articles WHERE abstract LIKE ? OR title LIKE ?;", (f'%{to_search}%',f'%{to_search}%')).fetchall()
+        
+        
+        from_authors = self._cur.execute(
+            "SELECT article_id, author_name FROM article_authors WHERE author_name LIKE ?;", (f'%{to_search}%',)).fetchall()
+        
+        from_tags = self._cur.execute(
+            "SELECT article_id, tag_name FROM article_tags WHERE tag_name LIKE ?;", (f'%{to_search}%',)).fetchall()
+
+        result = [x[0] for x in set(from_articles + from_authors + from_tags)]
+
+        # list of all articles that have a match (their article ids?)(result)
+            
+        # get article objects by their ids (new function in article_database)
+        # iterate over each article and give it a score based on how many times the search word appears
+        # sort the articles based on the scores
+        # return the articles in the order based on their scores
+        return result
+    
 if __name__ == "__main__":
     adb = ArticleDatabase()
     # insert some dummy data
