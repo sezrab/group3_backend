@@ -106,9 +106,9 @@ class ArticleDatabase:
     def search_articles(self, to_search):
         # get articles which match in some way with the keyword in the title, abstract or authors
         articles = self._cur.execute(
-            "SELECT * FROM articles").fetchall()
+            "SELECT * FROM articles WHERE abstract LIKE ?;", (f'%{to_search}%',)).fetchall()
         
-        return 'hello'
+        return articles
     
 if __name__ == "__main__":
     adb = ArticleDatabase()
