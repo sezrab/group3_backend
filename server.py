@@ -28,16 +28,25 @@ def get_articles():
     return response
 
 
+@app.route('/allTopics', methods=['GET'])
+def get_all_topics():
+    with open("topics.txt") as f:
+        topics = f.readlines()
+    topics = [x.strip() for x in topics]
+    return jsonify(topics)
+
+
 @app.route('/testing', methods=['GET'])
 def recommendation_testing():
     adb = ArticleDatabase()
 
     articles = adb.get_articles(2, 0, 100, fb.interests(1))
     output = []
-    for article,score in articles:
-        output.append((article.toJSON(),score))
+    for article, score in articles:
+        output.append((article.toJSON(), score))
 
     return output
+
 
 if __name__ == '__main__':
     app.run()
