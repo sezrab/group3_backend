@@ -28,7 +28,7 @@ def get_articles():
     return response
 
 
-@app.route('/testing', methods=['GET'])
+@app.route('/recommendation_score', methods=['GET'])
 def recommendation_testing():
     adb = ArticleDatabase()
 
@@ -36,8 +36,16 @@ def recommendation_testing():
     output = []
     for article,score in articles:
         output.append((article.toJSON(),score))
-
+        
     return output
+
+
+@app.route('/search', methods=['GET'])
+def user_search():
+    adb = ArticleDatabase()
+    to_search = request.args.get('search')
+    # matched_articles = adb.
+    
 
 if __name__ == '__main__':
     app.run()

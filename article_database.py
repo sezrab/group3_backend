@@ -72,7 +72,7 @@ class ArticleDatabase:
     
     # recommendation algorithm
     # want to get a list of articles fromn start to max which contains topics tags
-    def get_articles(self, sort, start_at, max_results, interests):
+    def get_articles(self, sort, max_results, interests):
         articles_ranked = []
 
         #for article in self.list_all_articles():
@@ -106,6 +106,13 @@ class ArticleDatabase:
         return objects
 
 
+    def search_articles(self, to_search):
+        # get articles which match in some way with the keyword in the title, abstract or authors
+        articles = self._cur.execute(
+            "SELECT * FROM articles").fetchall()
+        
+        return 'hello'
+    
 if __name__ == "__main__":
     adb = ArticleDatabase()
     # insert some dummy data
