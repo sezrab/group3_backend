@@ -21,6 +21,9 @@ print("-"*40)
 print("To:", user.email)
 print("Subject: Your NLP newsletter")
 print()
+print("Fernando,")  # change so its the user's name
+print("Your NLP recap is here!")
+print()
 adb = article_database.ArticleDatabase()
 
 interest_articles = adb.get_articles(sort=None, interests=user.interests,
@@ -74,11 +77,16 @@ wc.generate_from_frequencies(
     pp.tf(big_abstract))
 wc.to_file("wordcloud.png")
 
-print(f"Of your interests, the {
-      len(interest_wrapped)} most active topics were:")
 
-for tag, count in interest_wrapped:
-    print(f"  {tag} ({count} articles)")
+print(f"Here are your must read papers from the past {
+      user.newsletter_period} days."),
+
+interest_articles = interest_articles[:10]
+c = 0
+for article, score in interest_articles[:10]:
+    c += 1
+    date_nice = article.published.strftime("%B %d, %Y")
+    print(str(c)+".", article.title)
 
 print()
 
@@ -88,15 +96,11 @@ for tag, count in general_wrapped:
     print(f"  {tag} ({count} articles)")
 print()
 
-print(f"And here are your must read papers from the past {
-      user.newsletter_period} days."),
+print(f"Of your interests, the {
+      len(interest_wrapped)} most active topics were:")
+for tag, count in interest_wrapped:
+    print(f"  {tag} ({count} articles)")
 
-interest_articles = interest_articles[:10]
-c = 0
-for article, score in interest_articles[:10]:
-    c += 1
-    date_nice = article.published.strftime("%B %d, %Y")
-    print(str(c)+".", article.title)
 print()
 print()
 print("Happy reading!")
