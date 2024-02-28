@@ -7,6 +7,7 @@ import requests
 import xmltodict
 from models.article import Article
 from topic_classifier import tagger, utils
+import time
 CONFIDENCE_THRESH = 0.15
 
 
@@ -38,7 +39,7 @@ def getArxivData(search_query, start=0, max_results=10, sortBy="submittedDate"):
             entry['author'] = [entry['author']['name']]
         # print(entry['author'])
         if entry['authors'] == []:
-            print(entry)
+            print("NO AUTHORS", entry)
             exit()
 
         for url in entry['link']:
@@ -53,7 +54,6 @@ def getArxivData(search_query, start=0, max_results=10, sortBy="submittedDate"):
 
         entry['tags'] = tags
         a = Article.fromJSON(entry)
-        print(a)
         articles.append(a)
 
     return articles
@@ -61,6 +61,8 @@ def getArxivData(search_query, start=0, max_results=10, sortBy="submittedDate"):
 
 if __name__ == "__main__":
     COLLECTION_INTERVAL = 1  # in days
+    import article_database
+    db = article_database.ArticleDatabase()
     # read or create a collector_data.json file
     if os.path.exists("collector_data.json"):
         cdata = json.load(open("collector_data.json", 'r'))
@@ -76,26 +78,35 @@ if __name__ == "__main__":
             exit()
     else:
         last_updated = datetime.datetime.now(
-        ) - datetime.timedelta(days=COLLECTION_INTERVAL*10)
+        ) - datetime.timedelta(days=COLLECTION_INTERVAL*100)
+        # add the 100 most relevant
+        relevant = getArxivData(
+            "natural language processing", max_results=100, sortBy="relevance")
+        for a in relevant:
+            db.add_article(a, auto_commit=False)
 
     json.dump({"last_updated": datetime.datetime.now().strftime(
         "%d%m%y")}, open("collector_data.json", 'w'))
 
-    import article_database
-    db = article_database.ArticleDatabase()
-
     start = 0
     inDateRange = True
+    retries = 0
     while inDateRange:
+        print(f"Getting articles {start} to {start+100}")
         results = getArxivData("natural language processing", start=start, max_results=100,
                                sortBy="submittedDate")
         start += 100
         if len(results) == 0:
-            inDateRange = False
-            break
+            print("Stopped by arxiv API. No more results.")
+            if retries > 3:
+                inDateRange = False
+                break
+            time.sleep(5)
+            retries += 1
         for result in results:
             if result.published > last_updated:
-                print(f"Adding {result.title}")
+                retries = 0
+                # print(f"Adding {result.title}")
                 db.add_article(result, auto_commit=False)
             else:
                 inDateRange = False

@@ -20,10 +20,31 @@ class FirebaseManager:
         if doc.exists:
             return [(i, 1) for i in doc.to_dict()['interests']]
 
-    def settings(self, user_id):
+    def user(self, user_id):
         # get all the settings of a user
-        return {
-            "dark_mode": True,
-            "font_size": "small",
-            "notifications": False
-        }
+        doc_ref = self._db.collection(u'users').document(str(user_id))
+        doc = doc_ref.get()
+        if doc.exists:
+            return doc.to_dict()
+
+
+class FirebaseUser:
+    def __init__(self, user_id):
+        self._fb = FirebaseManager()
+        self._user_id = user_id
+        self._user = self._fb.user(user_id)
+
+    def refresh(self):
+        self._user = self._fb.user(self._user_id)
+
+    @property
+    def interests(self):
+        return [(i, 1) for i in self._user['interests']]
+
+    @property
+    def newsletter_period(self):
+        return self._user['newsletterPeriod']
+
+    @property
+    def email(self):
+        return self._user['newsletterAddress']

@@ -17,8 +17,6 @@ def get_articles():
 
     sortby = request.args.get('sort_by')
 
-    # interests = fb.interests(userid)
-    # articles = adb.list_all_articles()
     interests = fb.interests(userid)
     articles = [a[0] for a in adb.get_articles(sortby, 0, 10, interests)]
     output = []
@@ -40,16 +38,17 @@ def get_all_topics():
     return response
 
 
-@app.route('/recommendation_score', methods=['GET'])
-def recommendation_testing():
-    adb = ArticleDatabase()
+@app.route('/', methods=['GET'])
+def hello():
+    return "Hello, World!"
 
-    articles = adb.get_articles(2, 0, 100, fb.interests(1))
-    output = []
-    for article, score in articles:
-        output.append((article.toJSON(), score))
 
-    return output
+@app.route('/newsletter', methods=['GET'])
+def test_newsletter():
+    uid = request.args.get('uid')
+    fb.interests(uid)
+
+    return "Hello, World!"
 
 
 @app.route('/search', methods=['GET'])
@@ -60,8 +59,14 @@ def user_search():
         return []
     matched_articles = adb.search_articles(to_search)
 
-    return matched_articles
+    output = []
+    for article in matched_articles:
+        output.append(article.toJSON())
+
+    response = jsonify(output)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')

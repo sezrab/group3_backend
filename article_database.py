@@ -14,7 +14,8 @@ class ArticleDatabase:
                 id INTEGER PRIMARY KEY AUTOINCREMENT, 
                 title TEXT UNIQUE NOT NULL, 
                 abstract TEXT NOT NULL, 
-                url TEXT NOT NULL
+                url TEXT NOT NULL,
+                published TEXT NOT NULL
                 )
                 """)
 
@@ -43,10 +44,11 @@ class ArticleDatabase:
         self._cur = cur
 
     def add_article(self, article, auto_commit=True):
+        datestring = article.published.strftime("%d%m%y")
         # insert the article's title, abstract, and url into the "articles" table
         try:
-            article_id = self._cur.execute("INSERT INTO articles (title, abstract, url) VALUES (?, ?, ?)", (
-                article.title, article.abstract, article.url)).lastrowid
+            article_id = self._cur.execute("INSERT INTO articles (title, abstract, url, published) VALUES (?, ?, ?, ?)", (
+                article.title, article.abstract, article.url, datestring)).lastrowid
         except sqlite3.IntegrityError:
             # abort, the article already exists in the db
             return
@@ -71,16 +73,28 @@ class ArticleDatabase:
         pass
 
     # recommendation algorithm :)
-    def get_articles(self, sort, start_at, max_results, interests):
+    def get_articles(self, sort, interests, ignore_interests=False, start_date=None, stop_date=None):
+        thresh = 0.25
         articles_ranked = []
 
         for article in self.list_all_articles():
+            if start_date:
+                if article.published < start_date:
+                    continue
+            if stop_date:
+                if article.published > stop_date:
+                    continue
+            if ignore_interests:
+                articles_ranked.append((article, 1))
+                continue
             total = 0
             for interest, interest_score in interests:
                 for topic, topic_score in article.tags:
                     if (interest == topic):
-                        total = interest_score * topic_score
-                        articles_ranked.append((article, total))
+                        total += interest_score * topic_score
+            # print(total)
+            if total > thresh:
+                articles_ranked.append((article, total))
 
         return sorted(articles_ranked, key=lambda x: x[1], reverse=True)
 
@@ -89,7 +103,7 @@ class ArticleDatabase:
         articles = self._cur.execute(
             "SELECT * FROM articles").fetchall()
         objects = []
-        for id, title, abstract, url in articles:
+        for id, title, abstract, url, published in articles:
             authors = self._cur.execute(
                 "SELECT author_name FROM article_authors WHERE article_id = ?", (id,)).fetchall()
             for i, author in enumerate(authors):
@@ -98,36 +112,30 @@ class ArticleDatabase:
                 "SELECT tag_name,score FROM article_tags WHERE article_id = ?", (id,)).fetchall()
             import datetime
             a = Article(id=id, title=title, abstract=abstract, authors=authors,
-                        tags=tags, url=url, published=datetime.datetime.today())
+                        tags=tags, url=url, published=datetime.datetime.strptime(published, "%d%m%y"))
             objects.append(a)
         return objects
 
-
     def search_articles(self, to_search):
         # get articles which match in some way with the keyword in the title, abstract, authors, or tags
-        
-        matched_article_id = []
-        
+
         from_articles = self._cur.execute(
-            "SELECT id FROM articles WHERE abstract LIKE ? OR title LIKE ?;", (f'%{to_search}%',f'%{to_search}%')).fetchall()
-        
-        
+            "SELECT id FROM articles WHERE abstract LIKE ? OR title LIKE ?;", (f'%{to_search}%', f'%{to_search}%')).fetchall()
         from_authors = self._cur.execute(
             "SELECT article_id, author_name FROM article_authors WHERE author_name LIKE ?;", (f'%{to_search}%',)).fetchall()
-        
+
         from_tags = self._cur.execute(
             "SELECT article_id, tag_name FROM article_tags WHERE tag_name LIKE ?;", (f'%{to_search}%',)).fetchall()
 
-        result = [x[0] for x in set(from_articles + from_authors + from_tags)]
+        fetch_ids = [x[0]
+                     for x in set(from_articles + from_authors + from_tags)]
+        # get articles, corresponding authors, and tags from the database
+        articles = [article for article in self.list_all_articles()
+                    if article.id in fetch_ids]
 
-        # list of all articles that have a match (their article ids?)(result)
-            
-        # get article objects by their ids (new function in article_database)
-        # iterate over each article and give it a score based on how many times the search word appears
-        # sort the articles based on the scores
-        # return the articles in the order based on their scores
-        return result
-    
+        return articles
+
+
 if __name__ == "__main__":
     adb = ArticleDatabase()
     # insert some dummy data
