@@ -18,7 +18,8 @@ def get_articles():
     sortby = request.args.get('sort_by')
 
     interests = fb.interests(userid)
-    articles = [a[0] for a in adb.get_articles(sortby, 0, 10, interests)]
+    articles = [a[0]
+                for a in adb.get_articles(sort=sortby, interests=interests)]
     output = []
     for article in articles:
         output.append(article.toJSON())

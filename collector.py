@@ -35,8 +35,12 @@ def getArxivData(search_query, start=0, max_results=10, sortBy="submittedDate"):
             entry['author'] = author_names
             entry['authors'] = author_names
         except TypeError:
-            entry['authors'] = [entry['author']['name']]
-            entry['author'] = [entry['author']['name']]
+            try:
+                entry['authors'] = [entry['author']['name']]
+                entry['author'] = [entry['author']['name']]
+            except TypeError:
+                print("Some error with", entry)
+                continue
         # print(entry['author'])
         if entry['authors'] == []:
             print("NO AUTHORS", entry)
@@ -98,7 +102,7 @@ if __name__ == "__main__":
         start += 100
         if len(results) == 0:
             print("Stopped by arxiv API. No more results.")
-            if retries > 3:
+            if retries >= 2:
                 inDateRange = False
                 break
             time.sleep(5)

@@ -1,5 +1,6 @@
 # WIP
 
+import webbrowser
 import topic_classifier.paper_processor as pp
 import firebase_manager
 import article_database
@@ -16,16 +17,7 @@ today = datetime.datetime.now().replace(
 
 # get midnight of the day the user last received a newsletter
 last_sent = today - datetime.timedelta(days=user.newsletter_period)
-print()
-print("-"*40)
-print("To:", user.email)
-print("Subject: Your NLP newsletter")
-print()
-print("Fernando,")  # change so its the user's name
-print("Your NLP recap is here!")
-print()
 adb = article_database.ArticleDatabase()
-
 interest_articles = adb.get_articles(sort=None, interests=user.interests,
                                      start_date=last_sent, stop_date=today)
 
@@ -56,7 +48,6 @@ def tag_counter(articles):
 
 general_articles = adb.get_articles(
     sort=None, interests=[], ignore_interests=True, start_date=last_sent, stop_date=today)
-
 interest_wrapped = []
 tag_count = tag_counter(general_articles)
 for interest in user.interests:
@@ -68,41 +59,56 @@ general_wrapped = nlp_wrapped(general_articles)
 big_abstract = ""
 for article, score in interest_articles:
     big_abstract += article.abstract
-
+if big_abstract == "":
+    print("No articles found for your interests in the past",
+          user.newsletter_period, "days.")
+    exit()
 wc = wordcloud.WordCloud(
     background_color="rgba(255, 255, 255, 0)", mode="RGBA", width=1300, height=200, collocations=False, colormap="viridis")
-# toks = pp.tokenize(big_abstract)
-# big_abstract = " ".join(toks)
 wc.generate_from_frequencies(
     pp.tf(big_abstract))
 wc.to_file("wordcloud.png")
 
 
-print(f"Here are your must read papers from the past {
-      user.newsletter_period} days."),
-
+mustread = []
 interest_articles = interest_articles[:10]
 c = 0
 for article, score in interest_articles[:10]:
     c += 1
     date_nice = article.published.strftime("%B %d, %Y")
-    print(str(c)+".", article.title)
+    mustread.append(article.title)
 
-print()
 
-print(f"Overall this period, the {
-      len(general_wrapped)} most active topics were:")
-for tag, count in general_wrapped:
-    print(f"  {tag} ({count} articles)")
-print()
-
-print(f"Of your interests, the {
-      len(interest_wrapped)} most active topics were:")
-for tag, count in interest_wrapped:
-    print(f"  {tag} ({count} articles)")
-
-print()
-print()
-print("Happy reading!")
-print("NLPress")
-print("-"*40)
+out = f"""
+<html>
+<head>
+<style>
+body {"{"}
+  font-family: Arial, sans-serif;
+{"}"}
+</style>
+</head>
+<body>
+<img src="wordcloud.png" alt="Wordcloud" style="width: 100%; height: auto;">
+<p>Fernando,</p>
+<p>Here are your must read papers from the past {user.newsletter_period} days.</p>
+<ol>
+{"".join([f'<li>{title}</li>' for title in mustread])}
+</ol>
+<p>Overall this period, the {len(general_wrapped)} most active topics were:</p>
+<ul>
+{"".join([f'<li>{tag} ({count} articles)</li>' for tag, count in general_wrapped])}
+</ul>
+<p>Of your interests, the {len(interest_wrapped)} most active topics were:</p>
+<ul>
+{"".join([f'<li>{tag} ({count} articles)</li>' for tag, count in interest_wrapped])}
+</ul>
+<br>
+<p>Happy reading!</p>
+<p>NLPress</p>
+</body>
+</html>
+"""
+with open("newsletter.html", "w") as f:
+    f.write(out)
+webbrowser.open("newsletter.html")
