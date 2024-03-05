@@ -43,7 +43,13 @@ class FirebaseUser:
 
     @property
     def newsletter_period(self):
+        if 'newsletterPeriod' not in self._user:
+            return 7
         return self._user['newsletterPeriod']
+
+    @property
+    def name(self):
+        return self._user['name']
 
     @property
     def email(self):
