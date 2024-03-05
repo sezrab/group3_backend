@@ -53,4 +53,4 @@ class FirebaseUser:
 
     @property
     def email(self):
-        return self._user['newsletterAddress']
+        return self._user.get('newsletterAddress', None)
