@@ -9,7 +9,7 @@ def getSemanticData():
     query_params = {'query': 'quantum computing'}
 
     # Directly define the API key (Reminder: Securely handle API keys in production environments)
-    api_key = 'your api key goes here'  # Replace with the actual API key
+    api_key = 'K1V9sxPoyV8qu2JcxMx6e3FDi2x3vJVM4kLD3PJO'  # Replace with the actual API key
 
     # Define headers with API key
     headers = {'x-api-key': api_key}
