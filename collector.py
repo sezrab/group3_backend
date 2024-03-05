@@ -6,7 +6,7 @@ import sqlite3
 import requests
 import xmltodict
 from models.article import Article
-from topic_classifier import tagger, utils
+from topic_classifier import tagger
 import time
 CONFIDENCE_THRESH = 0.15
 

@@ -1,14 +1,18 @@
 # WIP
 
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import os
+from pathlib import Path
 import random
 import smtplib
-import fakemail
-import webbrowser
 import topic_classifier.paper_processor as pp
 import firebase_manager
 import article_database
 import wordcloud
 import datetime
+
 
 uid = input("Enter your user ID: ")
 
@@ -100,7 +104,7 @@ body {"{"}
 </style>
 </head>
 <body>
-<img src="wordcloud.png" alt="Wordcloud" style="width: 100%; height: auto;">
+<img src="cid:image1" alt="Wordcloud" style="width: 100%; height: auto;">
 <p>Hi {user.name},</p>
 <p>Your NLP recap is here!</p>
 <p>Here are your <b>must read</b> papers from the past {user.newsletter_period} days.</p>
@@ -123,26 +127,27 @@ NLPress</p>
 </html>
 """
 
-try:
-    server = smtplib.SMTP('localhost', 1025)
-    server.set_debuglevel(1)
-    fromaddr = "noreply@nlpress.com"
-    toaddrs = ["samuelezraberry@gmail.com"]
-    msg = ("From: %s\r\nTo: %s\r\n\r\n"
-    % (fromaddr, ", ".join(toaddrs)))
-    while True:
-        try:
-            line = input()
-        except EOFError:
-            break
-        if not line:
-            break
-        msg = msg + line
-    server.sendmail("noreply@nlpress.com", "samuelezraberry@gmail.com", out)
-    print("Successfully sent email")
-except smtplib.SMTPException:
-    print("Error: unable to send email")
 
-with open("newsletter.html", "w") as f:
-    f.write(out)
-webbrowser.open("newsletter.html")
+creds = str(Path.home()) + "/nlpresscrds"
+
+if os.path.exists(creds):
+    with open(creds, 'r') as f:
+        username,password = [line.strip() for line in f.readlines()]
+else:
+    print("No password file found. Please create a file at " + creds + " containing your email password.")
+    exit()
+
+img = open('wordcloud.png', 'rb').read() # read bytes from file
+# Create a multipart message container
+msg = MIMEMultipart()
+msg['From'] = "noreply@nlpress.com"
+msg['To'] = user.email
+msg['Subject'] = "Your NLP Recap"
+image = MIMEImage(img, name='wordcloud.png')
+image.add_header('Content-ID', '<image1>')
+msg.attach(image)
+msg.attach(MIMEText(out, 'html'))
+
+with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
+    smtp_server.login(username, password)
+    smtp_server.send_message(msg)
