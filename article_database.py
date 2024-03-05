@@ -117,7 +117,7 @@ class ArticleDatabase:
         return objects
 
     def search_articles(self, to_search):
-        # get articles which match in some way with the keyword in the title, abstract, authors, or tags
+        # get articles which match in some way with the user's search input in the title, abstract, authors, or tags
 
         from_articles = self._cur.execute(
             "SELECT id FROM articles WHERE abstract LIKE ? OR title LIKE ?;", (f'%{to_search}%', f'%{to_search}%')).fetchall()
