@@ -6,10 +6,11 @@ def getSemanticData():
     url = 'https://api.semanticscholar.org/graph/v1/paper/search'
 
     # More specific query parameter
-    query_params = {'query': 'quantum computing'}
+    query_params = {'query': 'semantic scholar platform',
+                    'limit': 3}
 
     # Directly define the API key (Reminder: Securely handle API keys in production environments)
-    api_key = 'K1V9sxPoyV8qu2JcxMx6e3FDi2x3vJVM4kLD3PJO'  # Replace with the actual API key
+    api_key = 'K1V9sxPoyV8qu2JcxMx6e3FDi2x3vJVM4kLD3PJO'  
 
     # Define headers with API key
     headers = {'x-api-key': api_key}
