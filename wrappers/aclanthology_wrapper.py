@@ -17,4 +17,3 @@ for paper in anthology.papers():
             name = paper.authors[i].first + ' ' + paper.authors[i].last
             myauthors.append(name)
         myarticle['authors'] = ', '.join(myauthors) # unsure how to format this
-        
