@@ -35,13 +35,17 @@ def getSemanticData(query, start_date, sort="publicationDate:asc", CONFIDENCE_TH
                     'publicationDateOrYear': publicationDateOrYear,
                     'fields': 'paperId,title,abstract,authors,publicationDate,fieldsOfStudy,url',
                     'limit': 100}
-    # Send the API request
-    response = requests.get(url + '/search', params=query_params, headers=headers, timeout=5)
-
+    try:
+        # Send the API request
+        response = requests.get(url + '/search', params=query_params, headers=headers, timeout=5)
+    except requests.exceptions.RequestException as e:
+        return []
     # Check response status
     if response.status_code == 200:
         response_data = response.json()
         article_objs = []
+        if response_data.get('data') is None:
+            return []
         for paper in response_data['data']:
             print(paper['publicationDate'])
             if type(paper['publicationDate']) == str:

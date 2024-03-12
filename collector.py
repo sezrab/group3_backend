@@ -43,12 +43,12 @@ if __name__ == "__main__":
     start = 0
     inDateRange = True
     retries = 0
+    start_date = last_updated
     while inDateRange:
         print(f"Getting articles {start} to {start+100}")
         results_arxiv = arxiv_wrapper.getArxivData("natural language processing", start=start, max_results=100,
                                sortBy="submittedDate", CONFIDENCE_THRESH=CONFIDENCE_THRESH)
-        results_semantic = semantic_wrapper.getSemanticData("natural language processing", start_date=last_updated,
-                                CONFIDENCE_THRESH=CONFIDENCE_THRESH)
+        results_semantic = semantic_wrapper.getSemanticData("natural language processing", start_date=start_date + datetime.timedelta(days=1), sort="publicationDate:asc", CONFIDENCE_THRESH=CONFIDENCE_THRESH)
         results = results_arxiv + results_semantic
         start += 100
         if len(results) == 0:
@@ -60,6 +60,8 @@ if __name__ == "__main__":
             retries += 1
         for result in results:
             if result.published > last_updated:
+                if result.published > start_date:
+                    start_date = result.published
                 retries = 0
                 # print(f"Adding {result.title}")
                 db.add_article(result, auto_commit=False)
