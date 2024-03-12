@@ -17,6 +17,7 @@ import datetime
 uid = input("Enter your user ID: ")
 
 user = firebase_manager.FirebaseUser(uid)
+user_read_articles = firebase_manager.FirebaseManager().get_read_articles(uid)
 
 # get midnight of today
 today = datetime.datetime.now().replace(
@@ -30,16 +31,14 @@ interest_articles = adb.get_articles(sort=None, interests=user.interests,
 
 
 # how many articles has the user read between start and end?
-def no_of_articles_read(start, end):
-    user_read_articles = firebase_manager.FirebaseManager().get_read_articles(uid)
-    
+def no_of_articles_read(start, end): 
     articles_counter = 0
     for article_date in user_read_articles.values():
         if start < article_date and end >= article_date:
             articles_counter += 1   # articles read this newsletter period
     return articles_counter
 
-
+# finds the first n most popular tags and works out what n is
 def nlp_wrapped(articles):
     tags = tag_counter(articles)
     tags = sorted(tags.items(), key=lambda x: x[1], reverse=True)
@@ -69,10 +68,15 @@ read_since_last_newsletter = no_of_articles_read(datetime.datetime.now() - datet
 # articles read since last last newsletter
 read_since_last_last_newsletter = no_of_articles_read(datetime.datetime.now() - datetime.timedelta(days=2*user.newsletter_period), datetime.datetime.now() - datetime.timedelta(days=user.newsletter_period))
 
+if read_since_last_last_newsletter - read_since_last_newsletter > 0:
+    reading_summary = f"Well done! You've viewed {read_since_last_last_newsletter - read_since_last_newsletter} more than last time!. Keep reading!"
+elif read_since_last_last_newsletter - read_since_last_newsletter < 0:
+    reading_summary = f"You've viewed {read_since_last_newsletter - read_since_last_last_newsletter} less than last time!. Keep reading!"
+else:
+    reading_summary = "You're reading pattern has stayed consistent since last time! You've read the same amount of articles as last time"
 
 
-
-
+# articles unread
 general_articles = adb.get_articles(
     sort=None, interests=[], ignore_interests=True, start_date=last_sent, stop_date=today)
 interest_wrapped = []
@@ -83,6 +87,8 @@ for interest in user.interests:
 interest_wrapped = sorted(interest_wrapped, key=lambda x: x[1], reverse=True)
 general_wrapped = nlp_wrapped(general_articles)
 
+
+# wordcloud
 big_abstract = ""
 for article, score in interest_articles:
     big_abstract += article.abstract
@@ -128,6 +134,7 @@ body {"{"}
 <p>Hi {user.name},</p>
 <p>Your NLP recap is here!</p>
 <p>In the past {user.newsletter_period} days, you've viewed {read_since_last_newsletter} articles. Well done!</p>
+<p>{read_}</p>
 <p>Here are your <b>must read</b> papers from the past {user.newsletter_period} days.</p>
 <ol>
 {"".join([f'<li><a href="{article.url}" target="_blank">{article.title}</a></li>' for article in mustread])}
