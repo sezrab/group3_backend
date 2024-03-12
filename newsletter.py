@@ -88,13 +88,17 @@ interest_wrapped = sorted(interest_wrapped, key=lambda x: x[1], reverse=True)
 general_wrapped = nlp_wrapped(general_articles)
 
 
-suggest_tag = []
-read_tags = tag_counter(firebase_manager.FirebaseManager.get_read_articles(user))
-for tag in read_tags:
-    for interest in user.interests:
-        if tag[0] != interest[0]:
-            suggest_tag.append(tag)
-suggest_tag_wrapped = sorted(interest_wrapped, key=lambda x: x[1], reverse=True)
+def suggest_tags(start, end):
+    suggest_tag = []
+    for article_date in user_read_articles.values():
+        if start < article_date and end >= article_date:
+            read_tags = tag_counter(user_read_articles)
+            for tag in read_tags:
+                for interest in user.interests:
+                    if tag[0] != interest[0]:
+                        suggest_tag.append(tag)
+    suggest_tag_wrapped = sorted(interest_wrapped, key=lambda x: x[1], reverse=True)
+    return suggest_tag_wrapped
 
 
 big_abstract = ""
