@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "ios-sim": "^9.0.0"
+  }
+}

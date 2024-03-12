@@ -10,7 +10,8 @@ myauthors = []
 for paper in anthology.papers():
     # lots of entries don't have an abstract
     if paper.abstract != None:
-        myarticle['title'] = paper.title._content.text
+        myarticle['title'] = paper.title._content
+        # print(myarticle['title'])
         myarticle['abstract'] = paper.abstract._content
         myarticle['url'] = paper.web_url
         for i in range(len(paper.authors)):

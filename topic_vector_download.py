@@ -1,6 +1,8 @@
 import clipboard
 from topic_classifier import paper_processor
-from topic_classifier import scraper
+# from topic_classifier import scraper
+from wrappers.semantic_wrapper import getSemanticData
+from datetime import datetime
 from topic_classifier import utils
 
 STOPWORD_SEARCH_TOP_PERCENT = 0.4
@@ -20,9 +22,8 @@ vf = utils.load_topic_vector_file(data_dir="topic_classifier/data/")
 for topic in subtopics:
     print(f"Scraping topic '{topic}'...")
     abstracts = []
-    for i in range(5):
-        papers = scraper.scrape_arxiv(topic)
-        abstracts += [paper["abstract"].lower() for paper in papers]
+    papers = getSemanticData(topic, start_date=datetime(2020,1,1))
+    abstracts += [paper.abstract for paper in papers]
     print(f"Analysing topic '{topic}'...")
     abstracts = " ".join(abstracts)
     tf = paper_processor.tf(abstracts)

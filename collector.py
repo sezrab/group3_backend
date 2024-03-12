@@ -7,61 +7,9 @@ import requests
 import xmltodict
 from models.article import Article
 from topic_classifier import tagger
+from wrappers import arxiv_wrapper, semantic_wrapper
 import time
-CONFIDENCE_THRESH = 0.15
-
-
-def getArxivData(search_query, start=0, max_results=10, sortBy="submittedDate"):
-    # https://info.arxiv.org/help/api/user-manual.html#_calling_the_api
-    # parameters:   search_query : string
-    #               start : int
-    #               max_results : int
-    #               sortBy : relevance, submittedDate, lastUpdatedDate
-    #               sortOrder : ascending, descending
-
-    url = f'http://export.arxiv.org/api/query?sortBy={sortBy}&search_query={
-        search_query}&start={start}&max_results={max_results}'
-    data = requests.get(url)
-    try:
-        entries = xmltodict.parse(' '.join(data.text.replace("\n", " ").split()))[
-            'feed']['entry']
-    except KeyError:
-        return []
-    articles = []
-
-    for entry in entries:
-        try:
-            author_names = [author['name'] for author in entry['author']]
-            entry['author'] = author_names
-            entry['authors'] = author_names
-        except TypeError:
-            try:
-                entry['authors'] = [entry['author']['name']]
-                entry['author'] = [entry['author']['name']]
-            except TypeError:
-                print("Some error with", entry)
-                continue
-        # print(entry['author'])
-        if entry['authors'] == []:
-            print("NO AUTHORS", entry)
-            exit()
-
-        for url in entry['link']:
-            if url.get("@title") == "pdf":
-                entry['url'] = url["@href"]
-                break
-            else:
-                entry['url'] = entry['link'][0]["@href"]
-
-        tags = tagger.tag_abstract(
-            entry['summary'], thresh=CONFIDENCE_THRESH, data_folder="topic_classifier/data/")
-
-        entry['tags'] = tags
-        a = Article.fromJSON(entry)
-        articles.append(a)
-
-    return articles
-
+CONFIDENCE_THRESH = 0.17
 
 if __name__ == "__main__":
     COLLECTION_INTERVAL = 1  # in days
@@ -84,8 +32,8 @@ if __name__ == "__main__":
         last_updated = datetime.datetime.now(
         ) - datetime.timedelta(days=COLLECTION_INTERVAL*100)
         # add the 100 most relevant
-        relevant = getArxivData(
-            "natural language processing", max_results=100, sortBy="relevance")
+        relevant = arxiv_wrapper.getArxivData(
+            "natural language processing", max_results=100, sortBy="relevance", CONFIDENCE_THRESH=CONFIDENCE_THRESH)
         for a in relevant:
             db.add_article(a, auto_commit=False)
 
@@ -97,8 +45,11 @@ if __name__ == "__main__":
     retries = 0
     while inDateRange:
         print(f"Getting articles {start} to {start+100}")
-        results = getArxivData("natural language processing", start=start, max_results=100,
-                               sortBy="submittedDate")
+        results_arxiv = arxiv_wrapper.getArxivData("natural language processing", start=start, max_results=100,
+                               sortBy="submittedDate", CONFIDENCE_THRESH=CONFIDENCE_THRESH)
+        results_semantic = semantic_wrapper.getSemanticData("natural language processing", start_date=last_updated,
+                                CONFIDENCE_THRESH=CONFIDENCE_THRESH)
+        results = results_arxiv + results_semantic
         start += 100
         if len(results) == 0:
             print("Stopped by arxiv API. No more results.")

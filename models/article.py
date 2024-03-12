@@ -41,7 +41,7 @@ class Article:
 
     @property
     def url(self):
-        if not self._url.startswith('https'):
+        if not self._url.startswith('http'):
             self._url = 'https://' + self._url
         return self._url
 
