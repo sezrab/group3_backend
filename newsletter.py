@@ -29,6 +29,17 @@ interest_articles = adb.get_articles(sort=None, interests=user.interests,
                                      start_date=last_sent, stop_date=today)
 
 
+# how many articles has the user read between start and end?
+def no_of_articles_read(start, end):
+    user_read_articles = firebase_manager.FirebaseManager().get_read_articles(uid)
+    
+    articles_counter = 0
+    for article_date in user_read_articles.values():
+        if start < article_date and end >= article_date:
+            articles_counter += 1   # articles read this newsletter period
+    return articles_counter
+
+
 def nlp_wrapped(articles):
     tags = tag_counter(articles)
     tags = sorted(tags.items(), key=lambda x: x[1], reverse=True)
@@ -51,6 +62,15 @@ def tag_counter(articles):
             tag_counter[tag] = tag_counter.get(tag, 0) + 1
 
     return tag_counter
+
+# articles read since last newsletter (between now and last newsletter sent)
+read_since_last_newsletter = no_of_articles_read(datetime.datetime.now() - datetime.timedelta(days=user.newsletter_period), datetime.datetime.now())
+
+# articles read since last last newsletter
+read_since_last_last_newsletter = no_of_articles_read(datetime.datetime.now() - datetime.timedelta(days=2*user.newsletter_period), datetime.datetime.now() - datetime.timedelta(days=user.newsletter_period))
+
+
+
 
 
 general_articles = adb.get_articles(
@@ -107,6 +127,7 @@ body {"{"}
 <img src="cid:image1" alt="Wordcloud" style="width: 100%; height: auto;">
 <p>Hi {user.name},</p>
 <p>Your NLP recap is here!</p>
+<p>In the past {user.newsletter_period} days, you've viewed {read_since_last_newsletter} articles. Well done!</p>
 <p>Here are your <b>must read</b> papers from the past {user.newsletter_period} days.</p>
 <ol>
 {"".join([f'<li><a href="{article.url}" target="_blank">{article.title}</a></li>' for article in mustread])}
