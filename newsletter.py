@@ -63,6 +63,16 @@ for interest in user.interests:
 interest_wrapped = sorted(interest_wrapped, key=lambda x: x[1], reverse=True)
 general_wrapped = nlp_wrapped(general_articles)
 
+
+suggest_tag = []
+read_tags = tag_counter(firebase_manager.FirebaseManager.get_read_articles(user))
+for tag in read_tags:
+    for interest in user.interests:
+        if tag[0] != interest[0]:
+            suggest_tag.append(tag)
+suggest_tag_wrapped = sorted(interest_wrapped, key=lambda x: x[1], reverse=True)
+
+
 big_abstract = ""
 for article, score in interest_articles:
     big_abstract += article.abstract
@@ -119,6 +129,10 @@ body {"{"}
 <p>Of your interests, the most active were:</p>
 <ul>
 {"".join([f'<li>{tag} ({count} articles)</li>' for tag, count in interest_wrapped])}
+</ul>
+<p>Here are some sugguested interests from the articles you have read:</p>
+<ul>
+{"".join([f'<li>{tag} ({count} articles)</li>' for tag, count in suggest_tag_wrapped])}
 </ul>
 <br>
 <p>Happy reading!<br>
