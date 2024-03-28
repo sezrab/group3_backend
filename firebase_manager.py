@@ -14,12 +14,7 @@ class FirebaseManager:
         return [5, 1, 25, 32]
 
     def get_read_articles(self, user_id):
-        return {
-            5: datetime.datetime.now() - datetime.timedelta(days=1),
-            1: datetime.datetime.now() - datetime.timedelta(days=7),
-            25: datetime.datetime.now() - datetime.timedelta(days=14),
-            32: datetime.datetime.now() - datetime.timedelta(days=3),
-        }
+        return self._db.collection(u'users').document(str(user_id)).get().to_dict()['readArticles']
 
     def interests(self, user_id):
         # get all the interests of a user

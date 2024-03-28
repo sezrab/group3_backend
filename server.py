@@ -28,6 +28,20 @@ def get_articles():
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
+@app.route('/getArticlesFromIDs', methods=['GET'])
+def get_articles_from_ids():
+    adb = ArticleDatabase()
+    ids = request.args.get('ids').split(',')
+    articles = [a
+                for a in adb.list_all_articles() if str(a.id) in ids] 
+    print(articles)
+    output = []
+    for article in articles:
+        output.append(article.toJSON())
+
+    response = jsonify(output)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 @app.route('/allTopics', methods=['GET'])
 def get_all_topics():

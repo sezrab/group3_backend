@@ -34,6 +34,8 @@ interest_articles = adb.get_articles(sort=None, interests=user.interests,
 def no_of_articles_read(start, end): 
     articles_counter = 0
     for article_date in user_read_articles.values():
+        # make article date timezone naive
+        article_date = article_date.replace(tzinfo=None)
         if start < article_date and end >= article_date:
             articles_counter += 1   # articles read this newsletter period
     return articles_counter
@@ -145,8 +147,7 @@ body {"{"}
 <img src="cid:image1" alt="Wordcloud" style="width: 100%; height: auto;">
 <p>Hi {user.name},</p>
 <p>Your NLP recap is here!</p>
-<p>In the past {user.newsletter_period} days, you've viewed {read_since_last_newsletter} articles. Well done!</p>
-<p>{read_}</p>
+<p>Since we last touched base, you read {read_since_last_newsletter} articles. Nice one.</p>
 <p>Here are your <b>must read</b> papers from the past {user.newsletter_period} days.</p>
 <ol>
 {"".join([f'<li><a href="{article.url}" target="_blank">{article.title}</a></li>' for article in mustread])}
@@ -160,9 +161,7 @@ body {"{"}
 <ul>
 {"".join([f'<li>{tag} ({count} articles)</li>' for tag, count in interest_wrapped])}
 </ul>
-<p>Here are some sugguested interests from the articles you have read:</p>
 <ul>
-{"".join([f'<li>{tag} ({count} articles)</li>' for tag, count in suggest_tag_wrapped])}
 </ul>
 <br>
 <p>Happy reading!<br>
