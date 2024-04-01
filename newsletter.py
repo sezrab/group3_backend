@@ -30,6 +30,7 @@ interest_articles = adb.get_articles(sort=None, interests=user.interests,
                                      start_date=last_sent, stop_date=today)
 
 
+
 # how many articles has the user read between start and end?
 def no_of_articles_read(start, end): 
     articles_counter = 0
@@ -75,7 +76,7 @@ if read_since_last_last_newsletter - read_since_last_newsletter > 0:
 elif read_since_last_last_newsletter - read_since_last_newsletter < 0:
     reading_summary = f"You've viewed {read_since_last_newsletter - read_since_last_last_newsletter} less than last time!. Keep reading!"
 else:
-    reading_summary = "You're reading pattern has stayed consistent since last time! You've read the same amount of articles as last time"
+    reading_summary = "You're reading pattern has stayed consistent since last time! You've read the same amount of articles."
 
 
 # articles unread
@@ -90,17 +91,54 @@ interest_wrapped = sorted(interest_wrapped, key=lambda x: x[1], reverse=True)
 general_wrapped = nlp_wrapped(general_articles)
 
 
-def suggest_tags(start, end):
-    suggest_tag = []
+
+def suggest_tags():
+    # suggests tags for a user based on the other tags in the articles they've read
+    # will return top 3
+    suggest_tag = {}
+    match = False
+    recent_user_read_articles = []
+    user_interests = [item[0] for item in user.interests]
+    
+    # makes it about recent articles (ones read since last newsletter)
+    
     for article_date in user_read_articles.values():
-        if start < article_date and end >= article_date:
-            read_tags = tag_counter(user_read_articles)
-            for tag in read_tags:
-                for interest in user.interests:
-                    if tag[0] != interest[0]:
-                        suggest_tag.append(tag)
-    suggest_tag_wrapped = sorted(interest_wrapped, key=lambda x: x[1], reverse=True)
-    return suggest_tag_wrapped
+        # make article date timezone naive
+        article_date = article_date.replace(tzinfo=None)
+        if (datetime.datetime.now() - datetime.timedelta(days=user.newsletter_period)) < article_date:
+            recent_user_read_articles = user_read_articles
+    
+    # if there are none, returns empty
+    if recent_user_read_articles == []:
+        return ""
+    
+    for article_id in recent_user_read_articles:
+        article_info = adb.get_article_by_ids(article_id)
+        # TESTING: what if not every article has tags?!
+        article_tags = [item[0] for item in article_info[0].tags]
+        for tag in article_tags:
+            # adjust suggest_tags
+            if tag not in suggest_tag.keys():
+                suggest_tag.update({tag: 0}) 
+        for tag in article_tags:
+            # if it's one of the user's interests, increment all the tags related to the articles, then break (no double points if it contains more )
+            if tag in user_interests: 
+                match = True
+                for tag2 in article_tags:
+                    suggest_tag[tag2] += 1
+            break
+    
+    # if there hasn't been a match, return empty
+    if match == False:
+        return ""
+    
+    suggest_tag_sorted = sorted(suggest_tag.items(), key=lambda x: x[1], reverse=True)
+    # gets rid of element if it's already in the user's list of interests
+    for el in suggest_tag_sorted:
+        if el[0] in user_interests:
+            suggest_tag_sorted.remove(el)
+    # TESTING: what if there aren't 3 suggestions?
+    return f"Time to mix it up with some new topics? Based on your recent reading, we think you'll enjoy delving into {suggest_tag_sorted[0][0]}, {suggest_tag_sorted[1][0]} and {suggest_tag_sorted[3][0]}"
 
 
 big_abstract = ""
@@ -148,6 +186,7 @@ body {"{"}
 <p>Hi {user.name},</p>
 <p>Your NLP recap is here!</p>
 <p>Since we last touched base, you read {read_since_last_newsletter} articles. Nice one.</p>
+<p>{reading_summary}</p>
 <p>Here are your <b>must read</b> papers from the past {user.newsletter_period} days.</p>
 <ol>
 {"".join([f'<li><a href="{article.url}" target="_blank">{article.title}</a></li>' for article in mustread])}
@@ -161,6 +200,7 @@ body {"{"}
 <ul>
 {"".join([f'<li>{tag} ({count} articles)</li>' for tag, count in interest_wrapped])}
 </ul>
+<p>{suggest_tags()}</p>
 <ul>
 </ul>
 <br>
