@@ -12,10 +12,17 @@ class FirebaseManager:
     def bookmarks(self, user_id):
         # get all the bookmarks of a user
         return [5, 1, 25, 32]
-
     def get_read_articles(self, user_id):
-        return self._db.collection(u'users').document(str(user_id)).get().to_dict()['readArticles']
-
+        try:
+            return self._db.collection(u'users').document(str(user_id)).get().to_dict()['readArticles']
+        except:
+            return {}
+        
+    def get_all_user_id(self):
+        try:
+            return self._db.collection(u'users').get()
+        except:
+            return{}
     def interests(self, user_id):
         # get all the interests of a user
         doc_ref = self._db.collection(u'users').document(str(user_id))
