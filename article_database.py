@@ -116,6 +116,23 @@ class ArticleDatabase:
             objects.append(a)
         return objects
 
+    def get_article_by_ids(self, ids):
+        self._cur.execute("SELECT * FROM articles WHERE id IN (?)", (ids,))
+        articles = self._cur.fetchall()
+        objects = []
+        for id, title, abstract, url, published in articles:
+            authors = self._cur.execute(
+                "SELECT author_name FROM article_authors WHERE article_id = ?", (id,)).fetchall()
+            for i, author in enumerate(authors):
+                authors[i] = author[0]
+            tags = self._cur.execute(
+                "SELECT tag_name,score FROM article_tags WHERE article_id = ?", (id,)).fetchall()
+            import datetime
+            a = Article(id=id, title=title, abstract=abstract, authors=authors,
+                        tags=tags, url=url, published=datetime.datetime.strptime(published, "%d%m%y"))
+            objects.append(a)
+        return objects
+
     def search_articles(self, to_search):
         # get articles which match in some way with the user's search input in the title, abstract, authors, or tags
 
