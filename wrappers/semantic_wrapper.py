@@ -41,7 +41,7 @@ def getSemanticData(query, start_date, sort="publicationDate:asc", CONFIDENCE_TH
     except requests.exceptions.RequestException as e:
         return []
     # Check response status
-    if response.status_code == 200:
+    if response.status_code == 200: 
         response_data = response.json()
         article_objs = []
         if response_data.get('data') is None:
