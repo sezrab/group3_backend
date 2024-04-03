@@ -17,7 +17,7 @@ import operator
 uid = input("Enter your user ID: ")
 
 user = firebase_manager.FirebaseUser(uid)
-#user_read_articles = firebase_manager.FirebaseManager().get_read_articles(uid)
+user_read_articles = firebase_manager.FirebaseManager().get_read_articles(uid)
 
 # get midnight of today
 today = datetime.datetime.now().replace(
@@ -32,9 +32,8 @@ interest_articles = adb.get_articles(sort=None, interests=user.interests,
 
 
 # how many articles has the user read between start and end?
-def no_of_articles_read(start, end, id): 
+def no_of_articles_read(start, end): 
     articles_counter = 0
-    user_read_articles = firebase_manager.FirebaseManager().get_read_articles(id)
     for article_date in user_read_articles.values():
         # make article date timezone naive
         article_date = article_date.replace(tzinfo=None)
@@ -57,19 +56,19 @@ def nlp_wrapped(articles):
             # print(f"  {tag} ({count} articles)")
     return out
 
-# The percentage placement of user for the number of articles read
-def placement_percentage(start, end):
-    no_read_by_user = {}
-    user_ids = firebase_manager.FirebaseManager().get_all_user_id()
-    for id in user_ids:
-        no_read_by_user.update({id: no_of_articles_read(start, end, id)})
-    print(no_read_by_user)
-    counter = 0
-    for i in user_placement_order:
-        if i[0] == uid:
-            return (counter/len(no_read_by_user))
-        else:
-            counter += 1
+# # The percentage placement of user for the number of articles read
+# def placement_percentage(start, end):
+#     no_read_by_user = {}
+#     user_ids = firebase_manager.FirebaseManager().get_all_user_id()
+#     for id in user_ids.values():
+#         no_read_by_user.update({id: no_of_articles_read(start, end, id)})
+#     print(no_read_by_user)
+#     counter = 0
+#     for i in no_read_by_user:
+#         if i[0] == uid:
+#             return (counter/len(no_read_by_user))
+#         else:
+#             counter += 1
 
 def tag_counter(articles):
     tag_counter = {}
@@ -79,13 +78,13 @@ def tag_counter(articles):
 
     return tag_counter
 
-user_placement_percentage = placement_percentage(datetime.datetime.now() - datetime.timedelta(days=user.newsletter_period), datetime.datetime.now())
+#user_placement_percentage = placement_percentage(datetime.datetime.now() - datetime.timedelta(days=user.newsletter_period), datetime.datetime.now())
 
 # articles read since last newsletter (between now and last newsletter sent)
-read_since_last_newsletter = no_of_articles_read(datetime.datetime.now() - datetime.timedelta(days=user.newsletter_period), datetime.datetime.now(), uid)
+read_since_last_newsletter = no_of_articles_read(datetime.datetime.now() - datetime.timedelta(days=user.newsletter_period), datetime.datetime.now())
 
 # articles read since last last newsletter
-read_since_last_last_newsletter = no_of_articles_read(datetime.datetime.now() - datetime.timedelta(days=2*user.newsletter_period), datetime.datetime.now() - datetime.timedelta(days=user.newsletter_period), uid)
+read_since_last_last_newsletter = no_of_articles_read(datetime.datetime.now() - datetime.timedelta(days=2*user.newsletter_period), datetime.datetime.now() - datetime.timedelta(days=user.newsletter_period))
 
 if read_since_last_last_newsletter - read_since_last_newsletter > 0:
     reading_summary = f"Well done! You've viewed {read_since_last_last_newsletter - read_since_last_newsletter} more than last time!. Keep reading!"
@@ -117,7 +116,6 @@ def suggest_tags():
     user_interests = [item[0] for item in user.interests]
     
     # makes it about recent articles (ones read since last newsletter)
-    user_read_articles = firebase_manager.FirebaseManager().get_read_articles(uid)
     for article_date in user_read_articles.values():
         # make article date timezone naive
         article_date = article_date.replace(tzinfo=None)
@@ -203,7 +201,6 @@ body {"{"}
 <p>Your NLP recap is here!</p>
 <p>Since we last touched base, you read {read_since_last_newsletter} articles. Nice one.</p>
 <p>{reading_summary}</p>
-<p>You are in the top {user_placement_percentage} of readers</p>
 <p>Here are your <b>must read</b> papers from the past {user.newsletter_period} days.</p>
 <ol>
 {"".join([f'<li><a href="{article.url}" target="_blank">{article.title}</a></li>' for article in mustread])}

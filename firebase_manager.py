@@ -18,11 +18,12 @@ class FirebaseManager:
         except:
             return {}
         
-    def get_all_user_id(self):
-        try:
-            return self._db.collection(u'users').get()
-        except:
-            return{}
+    # def get_all_user_id(self):
+    #     try:
+    #         return self._db.collection(u'users').get()
+    #     except:
+    #         return{}
+        
     def interests(self, user_id):
         # get all the interests of a user
         doc_ref = self._db.collection(u'users').document(str(user_id))
