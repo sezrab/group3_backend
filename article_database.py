@@ -15,6 +15,7 @@ class ArticleDatabase:
                 title TEXT UNIQUE NOT NULL, 
                 abstract TEXT NOT NULL, 
                 url TEXT NOT NULL,
+                source TEXT NOT NULL,
                 published TEXT NOT NULL
                 )
                 """)
@@ -47,8 +48,8 @@ class ArticleDatabase:
         datestring = article.published.strftime("%d%m%y")
         # insert the article's title, abstract, and url into the "articles" table
         try:
-            article_id = self._cur.execute("INSERT INTO articles (title, abstract, url, published) VALUES (?, ?, ?, ?)", (
-                article.title, article.abstract, article.url, datestring)).lastrowid
+            article_id = self._cur.execute("INSERT INTO articles (title, abstract, url, source, published) VALUES (?, ?, ?, ?, ?)", (
+                article.title, article.abstract, article.url, article.source, datestring)).lastrowid
         except sqlite3.IntegrityError:
             # abort, the article already exists in the db
             return

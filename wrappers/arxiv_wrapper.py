@@ -47,6 +47,8 @@ def getArxivData(search_query, start=0, max_results=10, sortBy="submittedDate", 
         tags = tagger.tag_abstract(
             entry['summary'], thresh=CONFIDENCE_THRESH, data_folder="topic_classifier/data/")
 
+        entry['source'] = 'arxiv'
+        
         entry['tags'] = tags
         a = Article.fromJSON(entry)
         articles.append(a)

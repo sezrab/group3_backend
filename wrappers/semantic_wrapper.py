@@ -59,6 +59,7 @@ def getSemanticData(query, start_date, sort="publicationDate:asc", CONFIDENCE_TH
                           published=paper['publicationDate'],
                           tags=tags,
                           url=paper['url'],
+                          source='semantic'
                           )
             article_objs.append(obj)
 

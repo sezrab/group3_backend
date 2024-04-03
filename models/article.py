@@ -56,10 +56,7 @@ class Article:
 
     @staticmethod
     def fromJSON(json):
-        return Article(title=json['title'], abstract=json['summary'], authors=json['authors'], tags=json['tags'], url=json['url'],
-                       source=json['source'], published=datetime.datetime.strptime(
-                           json['published'], "%Y-%m-%dT%H:%M:%SZ") if json['published'] else None
-                       )
+        return Article(title=json['title'], abstract=json['summary'], authors=json['authors'], tags=json['tags'], url=json['url'], source=json['source'], published=datetime.datetime.strptime(json['published'], "%Y-%m-%dT%H:%M:%SZ") if json['published'] else None)
 
     def toJSON(self):
         return {
