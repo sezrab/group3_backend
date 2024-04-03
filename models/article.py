@@ -3,7 +3,7 @@ import datetime
 
 
 class Article:
-    def __init__(self, title, abstract, authors, tags, published, url, id=None):
+    def __init__(self, title, abstract, authors, tags, published, url, source, id=None):
         self._id = id
         self._title = title
         self._abstract = abstract
@@ -11,6 +11,7 @@ class Article:
         self._tags = tags
         self._published = published
         self._url = url
+        self.source = source
 
     def __str__(self) -> str:
         return self.title + " by " + ', '.join(self._authors)
@@ -44,6 +45,10 @@ class Article:
         if not self._url.startswith('http'):
             self._url = 'https://' + self._url
         return self._url
+    
+    @property
+    def source(self):
+        return self._source
 
     @property
     def published(self):
@@ -52,7 +57,7 @@ class Article:
     @staticmethod
     def fromJSON(json):
         return Article(title=json['title'], abstract=json['summary'], authors=json['authors'], tags=json['tags'], url=json['url'],
-                       published=datetime.datetime.strptime(
+                       source=json['source'], published=datetime.datetime.strptime(
                            json['published'], "%Y-%m-%dT%H:%M:%SZ") if json['published'] else None
                        )
 
@@ -64,5 +69,6 @@ class Article:
             'authors': self._authors,
             'tags': self.tags_noscore,
             'published': self._published.isoformat() if self._published else None,
-            'url': self._url
+            'url': self._url,
+            'source': self._source
         }
