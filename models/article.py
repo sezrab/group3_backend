@@ -11,7 +11,7 @@ class Article:
         self._tags = tags
         self._published = published
         self._url = url
-        self.source = source
+        self._source = source
 
     def __str__(self) -> str:
         return self.title + " by " + ', '.join(self._authors)
