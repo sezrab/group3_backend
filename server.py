@@ -19,12 +19,20 @@ def get_articles():
 
     interests = fb.interests(userid)
     articles = [a[0]
-                for a in adb.get_articles(sort=sortby, interests=interests)]
+                for a in adb.get_articles(sort=sortby, interests=interests, sources=fb.get_selected_sources(userid))]
     output = []
     for article in articles:
         output.append(article.toJSON())
 
     response = jsonify(output)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
+@app.route('/listSources', methods=['GET'])
+def list_sources():
+    adb = ArticleDatabase()
+    sources = adb.list_sources()
+    response = jsonify(sources)
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 

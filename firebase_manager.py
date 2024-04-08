@@ -18,6 +18,12 @@ class FirebaseManager:
         except:
             return {}
         
+    def get_selected_sources(self, user_id):
+        # selected sources is an array of source names
+        try:
+            return self._db.collection(u'users').document(str(user_id)).get().to_dict()['selectedSources']
+        except:
+            return []
     # def get_all_user_id(self):
     #     try:
     #         return self._db.collection(u'users').get()
@@ -65,3 +71,6 @@ class FirebaseUser:
     @property
     def email(self):
         return self._user.get('newsletterAddress', None)
+
+    def get_selected_sources(self):
+        return self._fb.get_selected_sources(self._user_id)

@@ -26,10 +26,8 @@ today = datetime.datetime.now().replace(
 # get midnight of the day the user last received a newsletter
 last_sent = today - datetime.timedelta(days=user.newsletter_period)
 adb = article_database.ArticleDatabase()
-interest_articles = adb.get_articles(sort=None, interests=user.interests,
+interest_articles = adb.get_articles(sort=None, interests=user.interests, sources=user.get_selected_sources(),
                                      start_date=last_sent, stop_date=today)
-
-
 
 # how many articles has the user read between start and end?
 def no_of_articles_read(start, end): 

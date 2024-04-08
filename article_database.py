@@ -43,6 +43,10 @@ class ArticleDatabase:
                 """)
         self._con = con
         self._cur = cur
+        
+    def list_sources(self):
+        return [source[0] for source in self._cur.execute("SELECT DISTINCT source FROM articles").fetchall()]
+
 
     def add_article(self, article, auto_commit=True):
         datestring = article.published.strftime("%d%m%y")
@@ -74,7 +78,7 @@ class ArticleDatabase:
         pass
 
     # recommendation algorithm :)
-    def get_articles(self, sort, interests, ignore_interests=False, start_date=None, stop_date=None):
+    def get_articles(self, sort, interests, sources=[], ignore_interests=False, start_date=None, stop_date=None):
         thresh = 0.25
         articles_ranked = []
 
@@ -87,6 +91,8 @@ class ArticleDatabase:
                     continue
             if ignore_interests:
                 articles_ranked.append((article, 1))
+                continue
+            if sources!=[] and article.source not in sources:
                 continue
             total = 0
             for interest, interest_score in interests:
@@ -104,7 +110,7 @@ class ArticleDatabase:
         articles = self._cur.execute(
             "SELECT * FROM articles").fetchall()
         objects = []
-        for id, title, abstract, url, published in articles:
+        for id, title, abstract, url, source, published in articles:
             authors = self._cur.execute(
                 "SELECT author_name FROM article_authors WHERE article_id = ?", (id,)).fetchall()
             for i, author in enumerate(authors):
@@ -113,7 +119,7 @@ class ArticleDatabase:
                 "SELECT tag_name,score FROM article_tags WHERE article_id = ?", (id,)).fetchall()
             import datetime
             a = Article(id=id, title=title, abstract=abstract, authors=authors,
-                        tags=tags, url=url, published=datetime.datetime.strptime(published, "%d%m%y"))
+                        tags=tags, url=url, source=source, published=datetime.datetime.strptime(published, "%d%m%y"))
             objects.append(a)
         return objects
 
