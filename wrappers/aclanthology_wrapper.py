@@ -1,20 +1,32 @@
-# Needs to return a list of article objects
 from acl_anthology import Anthology
+from models.article import Article
+from datetime import datetime
 
-# Instantiate the Anthology from the official repository, will look for updates when called
-anthology = Anthology.from_repo(verbose=False)
+def getAclAnthologyData(search_query):
+    # Instantiate the Anthology, looks for updates when called
+    anthology = Anthology.from_repo(verbose=False)
 
-myarticle = {}
-myauthors = []
+    articles = []
+    for paper in anthology.papers():
+        if search_query.lower() in paper.title.lower() or search_query.lower() in paper.abstract.content.lower():
+            title = str(paper.title)
+            abstract = paper.abstract.content if paper.abstract.content else ""
+            url = paper.web_url
+            authors = [f"{author.first} {author.last}" for author in paper.authors]
+            published_year = paper.year
+            published_month = paper.month
+            month_number = datetime.strptime(published_month, '%B').month
+            published_date = datetime(int(published_year), month_number, 1) #months is broked
 
-for paper in anthology.papers():
-    # lots of entries don't have an abstract
-    if paper.abstract != None:
-        myarticle['title'] = paper.title._content
-        # print(myarticle['title'])
-        myarticle['abstract'] = paper.abstract._content
-        myarticle['url'] = paper.web_url
-        for i in range(len(paper.authors)):
-            name = paper.authors[i].first + ' ' + paper.authors[i].last
-            myauthors.append(name)
-        myarticle['authors'] = ', '.join(myauthors) # unsure how to format this
+            article = Article(
+                title=title,
+                abstract=abstract,
+                url=url,
+                authors=authors,
+                tags="", # don't know what to put here (i'm just a boy)
+                published=published_date
+            )
+            articles.append(article)
+
+    print(f"Total number of papers processed: {len(articles)}")
+    return articles
