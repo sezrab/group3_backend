@@ -61,18 +61,6 @@ def get_all_topics():
     return response
 
 
-@app.route('/', methods=['GET'])
-def hello():
-    return "Hello, World!"
-
-
-@app.route('/newsletter', methods=['GET'])
-def test_newsletter():
-    uid = request.args.get('uid')
-    fb.interests(uid)
-
-    return "Hello, World!"
-
 
 @app.route('/search', methods=['GET'])
 def user_search():
