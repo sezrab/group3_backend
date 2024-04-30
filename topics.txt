@@ -1,50 +1,43 @@
-Sentiment Analysis
-Text Classification
-Named Entity Recognition (NER)
-Part-of-Speech Tagging (POS)
-Machine Translation
-Speech Recognition
-Topic Modeling
-Text Summarization
-Language Modeling
-Word Embeddings
-Question Answering Systems
-Chatbot Development
-Optical Character Recognition (OCR)
-Information Extraction
-Coreference Resolution
-Text-to-Speech (TTS)
-Automatic Speech Recognition (ASR)
-Natural Language Generation (NLG)
-Natural Language Understanding (NLU)
-Semantic Analysis
-Lexical Analysis
-Syntactic Analysis (Parsing)
-Discourse Analysis
-Pragmatic Analysis
-Spell Checking
-Keyword Extraction
-Text Segmentation
-Relation Extraction
-Sentiment Extraction
-Text Mining
-Document Clustering
-Paraphrase Detection
-Language Identification
+Text Preprocessing
+Tokenization
+Normalization
+Stop Word Removal
 Stemming
 Lemmatization
-Stop Words Removal
-Text Wrangling
-Text Normalization
-Sequence Labeling
-Dialogue Systems
-Automatic Summarization
-Machine Reading Comprehension
-Cross-Lingual Language Understanding
-Multimodal Language Processing
+Word Sense Disambiguation
+Named Entity Recognition
+Coreference Resolution
+Word Embeddings
+Syntactic Analysis
+Parsing
+Semantic Analysis
+Sentiment Analysis
+Topic Modeling
+Textual Entailment
+Semantic Role Labeling
+Relation Extraction
+Discourse Analysis
+Pragmatic Analysis
+Machine Translation
+Natural Language Generation
+Text Summarization
+Question Answering Systems
+Chatbot Development
+Information Retrieval
+Text Mining
+Keyword Extraction
+Document Clustering
+Paraphrase Detection
+Text Classification
+Speech Recognition
+Text-to-Speech
+Language Identification
 Hate Speech Detection
 Fake News Detection
 Emotion Detection
 Argument Mining
 Textual Entailment
-AI in Healthcare
+Cross-Lingual Language Understanding
+Multimodal Language Processing
+Dialogue Systems
+Machine Reading Comprehension

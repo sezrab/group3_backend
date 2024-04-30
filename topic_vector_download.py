@@ -1,9 +1,8 @@
-import clipboard
 from topic_classifier import paper_processor
-# from topic_classifier import scraper
 from wrappers.semantic_wrapper import getSemanticData
 from datetime import datetime
 from topic_classifier import utils
+from time import sleep
 
 STOPWORD_SEARCH_TOP_PERCENT = 0.4
 STOPWORD_OCCURRENCE_THRESHOLD = 0.6
@@ -22,7 +21,20 @@ vf = utils.load_topic_vector_file(data_dir="topic_classifier/data/")
 for topic in subtopics:
     print(f"Scraping topic '{topic}'...")
     abstracts = []
-    papers = getSemanticData(topic, start_date=datetime(2020,1,1))
+    returned = 0
+    retries = 0
+    while returned == 0:
+        papers = getSemanticData(topic, start_date=datetime(2015, 1, 1))
+        returned = len(papers)
+        retries += 1
+        if retries > 3:
+            break
+        if returned == 0:
+            print("No papers returned. Retrying in 5 seconds...")
+            sleep(8)
+    if returned == 0:
+        print("No papers returned. Skipping topic.")
+        continue
     abstracts += [paper.abstract for paper in papers]
     print(f"Analysing topic '{topic}'...")
     abstracts = " ".join(abstracts)

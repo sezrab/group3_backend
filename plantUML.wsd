@@ -1,0 +1,148 @@
+@startuml
+left to right direction
+
+class Article {
+    -_id: str
+    -_title: str
+    -_abstract: str
+    -_authors: List
+    -_tags: List
+    -_published: datetime
+    -_url: str
+    -_source: str
+    +__init__(title: str, abstract: str, authors: List, tags: List, published: datetime, url: str, source: str, id: str)
+    +__str__(): str
+    +{field} id: str
+    +{field} title: str
+    +{field} abstract: str
+    +{field} authors: List
+    +{field} tags: List
+    +{field} tags_noscore: List
+    +{field} url: str
+    +{field} source: str
+    +{field} published: datetime
+    +fromJSON(json: Dict): Article
+    +toJSON(): Dict
+}
+
+class collector {
+    +main(): void
+}
+
+class tagger {
+    +tag_abstract(abstract: str, thresh: float, data_folder: str): List[Tuple[str, float]]
+}
+
+class paper_processor {
+    +tf(abstract: str): Dict[str, float]
+    +cosine_similarity(tf: Dict[str, float], tv: Dict[str, float]): float
+}
+
+class utils {
+    +load_topic_vector_file(data_dir: str): Dict[str, Dict[str, float]]
+}
+
+class ArticleDatabase {
+    +list_sources(): List
+    +add_article(article: Article, auto_commit: bool): void
+    +commit(): void
+}
+
+class Article {
+}
+
+class arxiv_wrapper {
+    +getArxivData(query: str, start: int, max_results: int, sortBy: str, CONFIDENCE_THRESH: float): List[Article]
+}
+
+class semantic_wrapper {
+    +getSemanticData(query: str, start_date: datetime, sort: str, CONFIDENCE_THRESH: float): List[Article]
+}
+
+class acl_wrapper {
+    +getAclAnthologyData(start_date: datetime, stop_date: datetime): List[Article]
+}
+
+class Server {
+    -app: Flask
+    -fb: FirebaseManager
+    +get_articles(): Response
+    +list_sources(): Response
+    +get_articles_from_ids(): Response
+    +get_all_topics(): Response
+    +user_search(): Response
+}
+
+
+class FirebaseUser {
+}
+
+class FirebaseManager {
+
+}
+
+class ArticleDatabase {
+    -_con: Connection
+    -_cur: Cursor
+    +__init__()
+    +list_sources(): List
+    +add_article(article: Article, auto_commit: bool): void
+    +commit(): void
+    +remove_article(article: Article): void
+    +get_relevant_articles(interests: List, sources: List, random_sample: bool, num_articles: int): List
+    +get_articles(interests: List, sources: List, ignore_interests: bool, start_date: datetime, stop_date: datetime): List
+    +list_all_articles(date_start: datetime, date_end: datetime): List
+    +search_articles(to_search: str): List
+    +get_article_by_ids(ids: List): List
+}
+
+class FirebaseManager {
+    -_db: firestore.Client
+    +__init__()
+    +bookmarks(user_id: str): List
+    +get_read_articles(user_id: str): Dict
+    +get_selected_sources(user_id: str, default: List): List
+    +interests(user_id: str): List
+    +user(user_id: str): Dict
+}
+
+class FirebaseUser {
+    -_fb: FirebaseManager
+    -_user_id: str
+    -_user: Dict
+    +__init__(user_id: str)
+    +refresh(): void
+    +{field} interests: List
+    +{field} newsletter_period: int
+    +{field} name: str
+    +{field} email: str
+    +get_selected_sources(): List
+}
+
+class Newsletter {
++run(): void
+}
+
+FirebaseUser ..> FirebaseManager : Uses
+Newsletter ..> FirebaseUser : Uses
+Newsletter ..> ArticleDatabase : Uses
+Newsletter ..> Article : Depends
+Server ..> Article : Depends
+Server ..> FirebaseManager : Uses
+Server ..> ArticleDatabase : Uses
+collector ..> ArticleDatabase : Uses
+collector ..> arxiv_wrapper : Uses
+collector ..> semantic_wrapper : Uses
+collector ..> acl_wrapper : Uses
+ArticleDatabase ..> Article : Uses
+arxiv_wrapper o-- Article : Creates
+semantic_wrapper o-- Article : Creates
+acl_wrapper o-- Article : Creates
+tagger ..> paper_processor : Uses
+tagger ..> utils : Uses
+arxiv_wrapper ..> tagger: Uses
+semantic_wrapper ..> tagger: Uses
+acl_wrapper ..> tagger: Uses
+
+
+@enduml
