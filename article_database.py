@@ -6,7 +6,7 @@ import datetime
 class ArticleDatabase:
     def __init__(self):
         # CONNECT TO DATABASE "articles.db" using SQLITE3
-        con = sqlite3.connect("articles.db")
+        con = sqlite3.connect("data/articles.db")
         cur = con.cursor()
         # create table "articles" if it does not exist
         # id (auto generate), title, abstract, url
@@ -133,6 +133,7 @@ class ArticleDatabase:
         # print(article_ids)
 
         articles = self.get_article_by_ids(article_ids)
+        print(len(articles))
         return articles
 
     # recommendation algorithm :)
@@ -167,8 +168,8 @@ class ArticleDatabase:
             if ignore_interests:
                 articles_ranked.append((article, 1))
                 continue
-            if sources != [] and article.source not in sources:
-                continue
+            # if sources != [] and article.source not in sources:
+            #     continue
             total = 0
             for interest, interest_score in interests:
                 for topic, topic_score in article.tags:

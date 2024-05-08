@@ -28,8 +28,8 @@ if __name__ == "__main__":
         print("Completed ACL Anthology data collection.")
 
     # read or create a collector_data.json file
-    if os.path.exists("collector_data.json"):
-        cdata = json.load(open("collector_data.json", "r"))
+    if os.path.exists("data/collector_data.json"):
+        cdata = json.load(open("data/collector_data.json", "r"))
         # get "last_updated" from the file as a datetime object
         last_updated = cdata["last_updated"]
         last_updated = datetime.datetime.strptime(last_updated, "%d%m%y")
@@ -57,7 +57,7 @@ if __name__ == "__main__":
 
     json.dump(
         {"last_updated": datetime.datetime.now().strftime("%d%m%y")},
-        open("collector_data.json", "w"),
+        open("data/collector_data.json", "w"),
     )
 
     start = 0
